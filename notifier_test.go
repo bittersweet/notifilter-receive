@@ -102,7 +102,7 @@ func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 
 func TestNotifierNotify(t *testing.T) {
 	n := Notifier{
-		EventName:        "User",
+		EventName:        "signup",
 		Template:         "name: {{.name}}",
 		NotificationType: "email",
 		Target:           "email@example.com",

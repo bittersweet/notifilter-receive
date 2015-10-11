@@ -74,22 +74,9 @@ func (s *Stat) notify() {
 	}
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
 
-Notify:
 	for i := 0; i < len(notifiers); i++ {
 		notifier := notifiers[i]
-		nt := notifier.NotificationType
-		fmt.Printf("Notifying notifier id: %d type: %s\n", notifier.Id, nt)
-		fmt.Printf("Incoming data: %v\n", s.toMap())
-
-		if !notifier.checkRules(s) {
-			continue Notify
-		}
-
-		if nt == "email" {
-			sendEmailNotification(s, &notifier)
-		} else if nt == "slack" {
-			sendSlackNotification(s, &notifier)
-		}
+		notifier.notify(s)
 	}
 }
 

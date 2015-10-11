@@ -38,3 +38,20 @@ func (n *Notifier) checkRules(s *Stat) bool {
 
 	return true
 }
+
+func (n *Notifier) notify(s *Stat) {
+	nt := n.NotificationType
+	fmt.Printf("Notifying notifier id: %d type: %s\n", n.Id, nt)
+	fmt.Printf("Incoming data: %v\n", s.toMap())
+
+	if !n.checkRules(s) {
+		// early return
+	}
+
+	switch nt {
+	case "email":
+		sendEmailNotification(s, n)
+	case "slack":
+		sendSlackNotification(s, n)
+	}
+}

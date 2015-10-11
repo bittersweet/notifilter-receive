@@ -155,12 +155,18 @@ func handlePreview(w http.ResponseWriter, r *http.Request) {
 	t := template.New("notificationTemplate")
 	t, err = t.Parse(incomingTemplate)
 	if err != nil {
-		log.Fatal("t.Parse of template", err)
+		log.Println("t.Parse of template", err)
+		http.Error(w, err.Error(), http.StatusNoContent)
+
+		return
 	}
 
 	err = t.Execute(&doc, incoming.toMap())
 	if err != nil {
-		log.Fatal("t.Execute ", err)
+		log.Println("t.Execute", err)
+		http.Error(w, err.Error(), http.StatusNoContent)
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

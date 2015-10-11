@@ -96,3 +96,16 @@ func TestPreview(t *testing.T) {
 	expected := "Mark is pretty cool, the number of the day is: 100"
 	assert.Equal(t, string(result), expected)
 }
+
+func TestPreviewWithInvalidInput(t *testing.T) {
+	params := url.Values{"class": {"Booking"}, "template": {"{{.name"}}
+	request, _ := http.NewRequest("POST", "/preview", strings.NewReader(params.Encode()))
+	request.Header.Set(
+		"Content-Type",
+		"application/x-www-form-urlencoded; param=value",
+	)
+	response := httptest.NewRecorder()
+	handlePreview(response, request)
+
+	assert.Equal(t, 204, response.Code)
+}

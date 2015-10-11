@@ -4,7 +4,7 @@
 CREATE table notifiers(
   id serial primary key,
   notification_type character varying(20),
-  class character varying(256),
+  event_name character varying(256),
   template text,
   rules json
 );

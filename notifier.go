@@ -42,7 +42,7 @@ func (n *Notifier) checkRules(e *Event) bool {
 	rulesMet := true
 	for _, rule := range rules {
 		if !rule.Met(e) {
-			e.log("[NOTIFY] rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v", rule.Key, rule.Type, rule.Setting, rule.Value, e.toMap()[rule.Key])
+			e.log("[NOTIFY] rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v", rule.Key, rule.Type, rule.Setting, rule.Value, e.dataToMap()[rule.Key])
 			rulesMet = false
 		}
 	}
@@ -64,7 +64,7 @@ func (n *Notifier) renderTemplate(e *Event) ([]byte, error) {
 		return []byte(""), err
 	}
 
-	err = t.Execute(&doc, e.toMap())
+	err = t.Execute(&doc, e.dataToMap())
 	if err != nil {
 		return []byte(""), err
 	}

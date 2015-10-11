@@ -28,16 +28,20 @@ type Event struct {
 	Data        types.JsonText `json:"data"`
 }
 
-// toMap transforms the raw JSON data into a map
-func (e *Event) toMap() map[string]interface{} {
+// dataToMap transforms the raw JSON data into a map
+func (e *Event) dataToMap() map[string]interface{} {
 	m := map[string]interface{}{}
-	e.Data.Unmarshal(&m)
+	err := e.Data.Unmarshal(&m)
+	if err != nil {
+		e.log("Error in dataToMap():", err)
+		return map[string]interface{}{}
+	}
 	return m
 }
 
 // persist saves the incoming event to Elasticsearch
 func (e *Event) persist() {
-	err := elasticsearch.Persist(e.requestID, e.Application, e.Identifier, e.toMap())
+	err := elasticsearch.Persist(e.requestID, e.Application, e.Identifier, e.dataToMap())
 	if err != nil {
 		e.log("Error persisting to ElasticSearch:", err)
 	}

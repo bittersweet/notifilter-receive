@@ -67,10 +67,7 @@ func sendEmailNotification(s *Stat, notifier *dbNotifier) {
 		log.Fatal("t.Parse of n.Template", err)
 	}
 
-	m := map[string]interface{}{}
-	s.Value.Unmarshal(&m)
-
-	err = t.Execute(&doc, m)
+	err = t.Execute(&doc, s.toMap())
 	if err != nil {
 		log.Fatal("t.Execute ", err)
 	}

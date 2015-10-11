@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	// "io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -20,14 +20,10 @@ func sendSlackNotification(s *Stat, notifier *dbNotifier) {
 		log.Fatal("t.Parse of n.Template", err)
 	}
 
-	m := map[string]interface{}{}
-	s.Value.Unmarshal(&m)
-
-	err = t.Execute(&doc, m)
+	err = t.Execute(&doc, s.toMap())
 	if err != nil {
 		log.Fatal("t.Execute ", err)
 	}
-	fmt.Println(string(doc.Bytes()))
 
 	sendSlack(s.Key, doc.Bytes())
 }
@@ -49,9 +45,9 @@ func sendSlack(class string, data []byte) {
 		log.Println("http.Get", err)
 	}
 	defer res.Body.Close()
-	contents, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Println("ReadAll", err)
-	}
-	fmt.Println(string(contents))
+	// contents, err := ioutil.ReadAll(res.Body)
+	// if err != nil {
+	// 	log.Println("ReadAll", err)
+	// }
+	// fmt.Println(string(contents))
 }

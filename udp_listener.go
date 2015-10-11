@@ -31,6 +31,12 @@ type dbNotifier struct {
 	// email address, slack channel, phone number, how to store?
 }
 
+func (s *Stat) toMap() map[string]interface{} {
+	m := map[string]interface{}{}
+	s.Value.Unmarshal(&m)
+	return m
+}
+
 func (s *Stat) persist() {
 	var incomingId int
 	query := `INSERT INTO incoming(received_at, class, data) VALUES($1, $2, $3) RETURNING id`
@@ -60,9 +66,6 @@ func (s *Stat) notify() {
 			sendSlackNotification(s, &notifier)
 		}
 	}
-}
-
-func (s *Stat) specialNotify(notifier *dbNotifier) {
 }
 
 func countRows() int {

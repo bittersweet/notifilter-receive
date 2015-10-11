@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"sort"
 	"time"
 
 	"github.com/jmoiron/sqlx/types"
@@ -66,17 +65,13 @@ func handleNew(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("ParseFiles", err)
 	}
 
-	list := keys.List()
-	alphabeticalList := make([]string, len(list))
-	for i, k := range list {
-		alphabeticalList[i] = k.(string)
-	}
-	sort.Strings(alphabeticalList)
+	// TODO: Get keys from ES, sorted alphabetically
+	keys := []string{"test"}
 
 	data := map[string]interface{}{
 		"classes":      classes,
 		"classesCount": len(classes),
-		"keys":         alphabeticalList,
+		"keys":         keys,
 	}
 
 	err = t.Execute(w, data)
@@ -152,7 +147,6 @@ func handlePreview(w http.ResponseWriter, r *http.Request) {
 	incoming := Incoming{}
 	err = db.Get(&incoming, "SELECT * FROM incoming WHERE class=$1 ORDER BY id DESC LIMIT 1", class)
 
-	fmt.Printf("%#v\n", incoming)
 	t := template.New("notificationTemplate")
 	t, err = t.Parse(incomingTemplate)
 	if err != nil {

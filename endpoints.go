@@ -67,6 +67,7 @@ func handleNew(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"classes":      classes,
 		"classesCount": len(classes),
+		"keys":         keys.List(),
 	}
 
 	err = t.Execute(w, data)

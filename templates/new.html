@@ -47,12 +47,9 @@
       <div id="rulesContainer">
         <div class="ruleSet">
           <select name="key">
-            <option value="name">name</option>
-            <option value="active">active</option>
-            <option value="number">number</option>
-            <option value="rating">rating</option>
-            <option value="domain">domain</option>
-            <option value="confirmed">confirmed</option>
+            {{ range $key := .keys }}
+            <option value="{{$key}}">{{$key}}</option>
+            {{ end }}
           </select>
           <select name="type">
             <option value="boolean">boolean</option>

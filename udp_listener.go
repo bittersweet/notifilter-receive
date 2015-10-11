@@ -11,11 +11,13 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	_ "github.com/lib/pq"
+	"gopkg.in/fatih/set.v0"
 )
 
 const maxPacketSize = 1024 * 1024
 
 var db *sqlx.DB
+var keys = set.New()
 
 type Stat struct {
 	Key   string         `json:"key"`
@@ -66,6 +68,21 @@ func (i *Incoming) FormattedData() string {
 	return string(i.Data)
 }
 
+func (i *Incoming) keys() []string {
+	var parsed map[string]interface{}
+	err := json.Unmarshal([]byte(i.Data), &parsed)
+	if err != nil {
+		log.Fatal("json.Unmarshal", err)
+	}
+
+	keys := make([]string, 0, len(parsed))
+	for k := range parsed {
+		keys = append(keys, k)
+	}
+	fmt.Println("Keys:", keys)
+	return keys
+}
+
 func (s *Stat) toMap() map[string]interface{} {
 	m := map[string]interface{}{}
 	s.Value.Unmarshal(&m)
@@ -109,9 +126,18 @@ Notify:
 	}
 }
 
+func (s *Stat) keys() []string {
+	sMap := s.toMap()
+	keys := make([]string, 0, len(sMap))
+	for k := range sMap {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 func countRows() int {
 	var rows int
-	err := db.QueryRow("select count(*) from incoming").Scan(&rows)
+	err := db.QueryRow("SELECT COUNT(*) FROM incoming").Scan(&rows)
 	if err != nil {
 		log.Fatal("rowcount: ", err)
 	}
@@ -120,6 +146,8 @@ func countRows() int {
 }
 
 func listenToUDP(conn *net.UDPConn) {
+	updates := keyLogger()
+
 	buffer := make([]byte, maxPacketSize)
 	for {
 		bytes, err := conn.Read(buffer)
@@ -139,7 +167,46 @@ func listenToUDP(conn *net.UDPConn) {
 		}
 
 		stat.persist()
+		updates <- stat.keys()
 		stat.notify()
+	}
+}
+
+func keyLogger() chan<- []string {
+	updates := make(chan []string)
+
+	go func() {
+		for {
+			select {
+			case incomingKeys := <-updates:
+				// iterate over slice and append if not found
+				for _, k := range incomingKeys {
+					keys.Add(k)
+				}
+				fmt.Println("Keys:", keys)
+			}
+		}
+	}()
+
+	fmt.Println("keyLogger launched")
+	return updates
+}
+
+func updateKeysFromLatest() {
+	incoming := []Incoming{}
+	err := db.Select(&incoming, "SELECT * FROM incoming ORDER BY id DESC LIMIT 10")
+	if err != nil {
+		log.Fatal("db.Select incoming ", err)
+	}
+
+	for _, record := range incoming {
+		fmt.Printf("%#v\n", record.Data)
+		rKeys := record.keys()
+
+		for _, k := range rKeys {
+			fmt.Println("Adding:", k)
+			keys.Add(k)
+		}
 	}
 }
 
@@ -168,6 +235,8 @@ func main() {
 
 	rows := countRows()
 	fmt.Println("Total rows:", rows)
+
+	updateKeysFromLatest()
 
 	fmt.Println("Will start listening on port 8000")
 	http.ListenAndServe(":8000", nil)

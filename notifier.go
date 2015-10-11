@@ -89,5 +89,5 @@ func (n *Notifier) notify(s *Event, mn MessageNotifier) {
 
 	message := n.renderTemplate(s)
 	mn.sendMessage(s.Identifier, message)
-	fmt.Printf("Notifying notifier id: done\n", n.Id)
+	fmt.Printf("Notifying notifier id: %d done\n", n.Id)
 }

@@ -23,7 +23,10 @@ func (mn *LocalMessageNotifier) SendMessage(eventName string, target string, dat
 }
 
 func setupTestNotifier(data types.JsonText) Event {
-	return Event{"signup", data}
+	return Event{
+		Identifier: "signup",
+		Data:       data,
+	}
 }
 
 func TestNewNotifier(t *testing.T) {
@@ -193,7 +196,7 @@ func TestNotifierRenderTemplateWithLogic(t *testing.T) {
 	assert.Equal(t, expected, result)
 
 	data = types.JsonText(`{"active": false, "name": "Go", "number": 12}`)
-	event = Event{"signup", data}
+	event = setupTestNotifier(data)
 
 	result, _ = n.renderTemplate(&event)
 	expected = []byte("inactive")

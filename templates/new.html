@@ -29,11 +29,15 @@
         <option value="email">email</option>
       </select>
       <br><br>
-      <select name="class">
-        {{ range $class := .classes }}
-        <option value="{{$class}}">{{$class}}</option>
-        {{ end }}
-      </select>
+      {{ if gt .classesCount 0 }}
+        <select name="class">
+          {{ range $class := .classes }}
+            <option value="{{$class}}">{{$class}}</option>
+          {{ end }}
+        </select>
+      {{ else }}
+        <textarea rows="1" cols="50" name="class"></textarea>
+      {{ end }}
       <br><br>
       <textarea rows="4" cols="50" name="template" id="template"></textarea>
       <br><br>

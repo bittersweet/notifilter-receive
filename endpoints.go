@@ -35,7 +35,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	incoming := []Incoming{}
-	err = db.Select(&incoming, "SELECT * FROM incoming ORDER BY id desc")
+	err = db.Select(&incoming, "SELECT * FROM incoming ORDER BY id DESC LIMIT 10")
 	if err != nil {
 		log.Fatal("db.Select incoming ", err)
 	}

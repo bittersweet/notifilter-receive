@@ -38,3 +38,30 @@ func Persist(key string, data map[string]interface{}) error {
 	log.Println("[ES]", string(body))
 	return nil
 }
+
+func EventCount() (int, error) {
+	type response struct {
+		Hits struct {
+			Total int `json:"total"`
+		} `json:"hits"`
+	}
+
+	resp, err := http.Get("http://localhost:9200/notifilter/event/_search?size=0")
+	if err != nil {
+		return 0, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println("[ES] response: ", string(body))
+
+	var parsed response
+	err = json.Unmarshal(body, &parsed)
+	if err != nil {
+		return 0, err
+	}
+
+	fmt.Println(parsed)
+	return parsed.Hits.Total, nil
+}

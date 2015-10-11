@@ -33,9 +33,9 @@ type Incoming struct {
 }
 
 type ESPayload struct {
-	Key  string                 `json:"key"`
-	Day  int                    `json:"day"`
-	Data map[string]interface{} `json:"data"`
+	Key        string                 `json:"key"`
+	ReceivedAt time.Time              `json:"received_at"`
+	Data       map[string]interface{} `json:"data"`
 }
 
 func (i *Incoming) FormattedData() string {
@@ -79,9 +79,9 @@ func (e *Event) notify() {
 
 	go func() {
 		payload := ESPayload{
-			Key:  e.Key,
-			Day:  1,
-			Data: e.toMap(),
+			Key:        e.Key,
+			ReceivedAt: time.Now(),
+			Data:       e.toMap(),
 		}
 		body, _ := json.Marshal(payload)
 		resp, err := http.Post("http://localhost:9200/notifilter/event/?pretty", "application/json", bytes.NewReader(body))

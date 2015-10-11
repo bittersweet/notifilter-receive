@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	db, _ = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")
+	db, _ = sqlx.Connect("postgres", "user=markmulder dbname=notifilter_development sslmode=disable")
 }
 
 func TestCountStatus(t *testing.T) {

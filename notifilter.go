@@ -113,7 +113,7 @@ func main() {
 	}
 	go listenToUDP(conn)
 
-	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")
+	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifilter_development sslmode=disable")
 	if err != nil {
 		log.Fatal("DB Open()", err)
 	}

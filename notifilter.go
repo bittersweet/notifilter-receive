@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"runtime"
 	"time"
 
 	"github.com/bittersweet/notifilter/elasticsearch"
@@ -160,8 +159,6 @@ func listenToUDP(conn *net.UDPConn) {
 // main handles setting up connections for UDP/TCP and connecting to Postgres
 // Note, sqlx uses a connection pool internally.
 func main() {
-	runtime.GOMAXPROCS(4)
-
 	err := envconfig.Process("notifilter", &C)
 	if err != nil {
 		log.Fatal("Could not load config: ", err.Error())

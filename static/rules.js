@@ -45,5 +45,21 @@ $(document).ready(function() {
         event.preventDefault();
         $(this).parent().remove();
     });
+
+    $("#notifierForm input[name=preview]").on("click", function(event) {
+        event.preventDefault();
+
+        var notifierClass = $("#notifierForm select[name=class]").val();
+        var template = $("#template").val();
+        payload = {
+            class: notifierClass,
+            template: template
+        }
+
+        $.post("/preview", payload, function(data) {
+            console.log("output: ", data);
+            $("#templatePreview").text(data);
+        }, "text");
+    });
 });
 

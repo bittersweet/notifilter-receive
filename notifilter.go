@@ -179,7 +179,7 @@ func main() {
 	}
 	go listenToUDP(conn)
 
-	pgStr := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable", C.DBHost, C.DBUser, C.DBName)
+	pgStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", C.DBHost, C.DBUser, C.DBPassword, C.DBName)
 	db, err = sqlx.Connect("postgres", pgStr)
 	if err != nil {
 		log.Fatal("DB Open()", err)

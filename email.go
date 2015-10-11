@@ -50,6 +50,7 @@ func (e *emailNotifier) sendMessage(class string, data []byte) NotifierResponse 
 	}
 
 	// TODO: setup env variables to support multiple envs
+	// TODO: Set up real test mode instead of using mailcatcher
 	auth := smtp.PlainAuth("", "", "", "localhost:1025")
 	err = smtp.SendMail("localhost:1025", auth, "test@example.com", []string{"recipient@example.com"}, doc.Bytes())
 	if err != nil {

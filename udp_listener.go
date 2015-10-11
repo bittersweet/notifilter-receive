@@ -72,6 +72,7 @@ func (s *Stat) notify() {
 	if err != nil {
 		log.Fatal("db.Select ", err)
 	}
+	fmt.Printf("Incoming data: %v\n", s.toMap())
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
 
 	for i := 0; i < len(notifiers); i++ {

@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"text/template"
 )
 
 var transport http.RoundTripper
@@ -16,24 +14,6 @@ var transport http.RoundTripper
 type slackResponse struct {
 	Ok bool   `json:"ok"`
 	Ts string `json:"ts"`
-}
-
-func sendSlackNotification(s *Stat, notifier *Notifier) {
-	var err error
-	var doc bytes.Buffer
-
-	t := template.New("notificationTemplate")
-	t, err = t.Parse(notifier.Template)
-	if err != nil {
-		log.Fatal("t.Parse of n.Template", err)
-	}
-
-	err = t.Execute(&doc, s.toMap())
-	if err != nil {
-		log.Fatal("t.Execute ", err)
-	}
-
-	sendSlack(s.Key, doc.Bytes())
 }
 
 func getTransport() http.RoundTripper {

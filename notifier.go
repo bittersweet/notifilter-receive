@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"log"
+	"text/template"
 
 	"github.com/jmoiron/sqlx/types"
 )
@@ -39,19 +42,37 @@ func (n *Notifier) checkRules(s *Stat) bool {
 	return true
 }
 
+func (n *Notifier) renderTemplate(s *Stat) []byte {
+	var err error
+	var doc bytes.Buffer
+
+	t := template.New("notificationTemplate")
+	t, err = t.Parse(n.Template)
+	if err != nil {
+		log.Fatal("t.Parse of n.Template", err)
+	}
+
+	err = t.Execute(&doc, s.toMap())
+	if err != nil {
+		log.Fatal("t.Execute ", err)
+	}
+
+	return doc.Bytes()
+}
+
 func (n *Notifier) notify(s *Stat) {
 	nt := n.NotificationType
 	fmt.Printf("Notifying notifier id: %d type: %s\n", n.Id, nt)
-	fmt.Printf("Incoming data: %v\n", s.toMap())
 
 	if !n.checkRules(s) {
 		// early return
 	}
 
+	message := n.renderTemplate(s)
 	switch nt {
 	case "email":
-		sendEmailNotification(s, n)
+		sendEmail(s.Key, message)
 	case "slack":
-		sendSlackNotification(s, n)
+		sendSlack(s.Key, message)
 	}
 }

@@ -11,7 +11,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/smtp"
 	"text/template"
 	"time"
 )
@@ -29,6 +28,8 @@ type dbNotifier struct {
 	Id       int    `db:"id"`
 	Class    string `db:"class"`
 	Template string `db:"template"`
+	// type slack/email/direct to phone
+	// email address, slack channel, phone number, how to store?
 }
 
 func (s *Stat) persist() {
@@ -127,55 +128,6 @@ func handleCount(w http.ResponseWriter, r *http.Request) {
 	w.Write(output)
 }
 
-const emailTemplate = `From: {{.From}}
-To: {{.To}}
-Subject: {{.Subject}}
-MIME-version: 1.0
-Content-Type: text/html; charset="UTF-8"
-
-<html>
-<body>
-{{.Body}}
-</body>
-</html>`
-
-type EmailData struct {
-	From    string
-	To      string
-	Subject string
-	Body    string
-}
-
-func sendEmail(class string, data []byte) {
-	var err error
-	var doc bytes.Buffer
-
-	t := template.New("emailTemplate")
-	t, err = t.Parse(emailTemplate)
-	if err != nil {
-		log.Fatal("t.Parse ", err)
-	}
-	context := &EmailData{
-		"Springest Dev <developers@springest.nl>",
-		"recipient@example.com",
-		"Email subject line",
-		string(data),
-	}
-	err = t.Execute(&doc, context)
-	if err != nil {
-		log.Fatal("t.Execute ", err)
-	}
-
-	auth := smtp.PlainAuth("", "", "", "localhost:1025")
-	err = smtp.SendMail("localhost:1025", auth, "test@example.com", []string{"recipient@example.com"}, doc.Bytes())
-	if err != nil {
-		log.Fatal("smtp.SendMail ", err)
-	}
-
-	// drop e-mail job on a rate limited (max workers) queue
-	// already experienced a connection reset by peer locally
-}
-
 func main() {
 	addr, err := net.ResolveUDPAddr("udp", ":8000")
 	if err != nil {
@@ -196,7 +148,7 @@ func main() {
 	defer db.Close()
 
 	rows := countRows()
-	fmt.Println("Total rows: ", rows)
+	fmt.Println("Total rows:", rows)
 
 	fmt.Println("Will start listening on port 8000")
 	http.ListenAndServe(":8000", nil)

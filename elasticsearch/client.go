@@ -11,17 +11,17 @@ import (
 )
 
 type ESPayload struct {
-	Key        string                 `json:"key"`
+	Name       string                 `json:"name"`
 	ReceivedAt time.Time              `json:"received_at"`
 	Data       map[string]interface{} `json:"data"`
 }
 
 // Persist saves incoming events to Elasticsearch
-func Persist(key string, data map[string]interface{}) error {
-	log.Printf("[ES] Persisting to %s: %v\n", key, data)
+func Persist(name string, data map[string]interface{}) error {
+	log.Printf("[ES] Persisting to %s: %v\n", name, data)
 
 	payload := ESPayload{
-		Key:        key,
+		Name:       name,
 		ReceivedAt: time.Now(),
 		Data:       data,
 	}

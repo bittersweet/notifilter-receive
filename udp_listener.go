@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	"runtime"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -29,6 +32,12 @@ type Incoming struct {
 	Class      string    `db:"class"`
 	ReceivedAt time.Time `db:"received_at"`
 	Data       string    `db:"data"`
+}
+
+type ESPayload struct {
+	Key  string                 `json:"key"`
+	Day  int                    `json:"day"`
+	Data map[string]interface{} `json:"data"`
 }
 
 func (i *Incoming) FormattedData() string {
@@ -85,6 +94,25 @@ func (s *Stat) notify() {
 	fmt.Printf("Incoming data: %v\n", s.toMap())
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
 
+	go func() {
+		payload := ESPayload{
+			Key:  s.Key,
+			Day:  1,
+			Data: s.toMap(),
+		}
+		body, _ := json.Marshal(payload)
+		resp, err := http.Post("http://localhost:9200/notifilter/incoming/?pretty", "application/json", bytes.NewReader(body))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer resp.Body.Close()
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Print(string(body))
+	}()
+
 	for i := 0; i < len(notifiers); i++ {
 		notifier := notifiers[i]
 		notifier.notify(s, notifier.newNotifier())
@@ -110,8 +138,38 @@ func countRows() int {
 	return rows
 }
 
+func incomingItems() chan<- []byte {
+	incomingChan := make(chan []byte)
+
+	go func() {
+		var i = 0
+		for {
+			select {
+			case b := <-incomingChan:
+				i = i + 1
+				fmt.Println(i)
+
+				var stat Stat
+				err := json.Unmarshal(b, &stat)
+				if err != nil {
+					log.Println(err)
+					log.Printf("%+v\n", stat)
+				}
+				stat.persist()
+				// updates <- stat.keys()
+				stat.notify()
+				// fmt.Println(string(b))
+			}
+		}
+	}()
+
+	fmt.Println("incomingItems launched")
+	return incomingChan
+}
+
 func listenToUDP(conn *net.UDPConn) {
-	updates := keyLogger()
+	// updates := keyLogger()
+	incomingChan := incomingItems()
 
 	buffer := make([]byte, maxPacketSize)
 	for {
@@ -123,17 +181,11 @@ func listenToUDP(conn *net.UDPConn) {
 
 		msg := make([]byte, bytes)
 		copy(msg, buffer)
+		incomingChan <- msg
 
-		var stat Stat
-		err = json.Unmarshal(msg, &stat)
-		if err != nil {
-			log.Println(err)
-			log.Printf("%+v\n", stat)
-		}
-
-		stat.persist()
-		updates <- stat.keys()
-		stat.notify()
+		// stat.persist()
+		// updates <- stat.keys()
+		// stat.notify()
 	}
 }
 
@@ -176,6 +228,8 @@ func updateKeysFromLatest() {
 }
 
 func main() {
+	runtime.GOMAXPROCS(4)
+
 	addr, err := net.ResolveUDPAddr("udp", ":8000")
 	if err != nil {
 		log.Fatal("ResolveUDPAddr", err)

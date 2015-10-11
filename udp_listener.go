@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	// _ "github.com/jmoiron/sqlx"
+	"bytes"
 	"github.com/jmoiron/sqlx/types"
 	_ "github.com/lib/pq"
 	"log"
 	"net"
 	"net/http"
+	"net/smtp"
+	"text/template"
 	"time"
 )
 
@@ -78,8 +81,52 @@ func handleCount(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("MarshalIndent", err)
 	}
 
+	sendEmail()
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(output)
+}
+
+const emailTemplate = `From: {{.From}}
+To: {{.To}}
+Subject: {{.Subject}}
+MIME-version: 1.0
+Content-Type: text/html; charset="UTF-8"
+
+{{.Body}}`
+
+type EmailData struct {
+	From    string
+	To      string
+	Subject string
+	Body    string
+}
+
+func sendEmail() {
+	var err error
+	var doc bytes.Buffer
+
+	t := template.New("emailTemplate")
+	t, err = t.Parse(emailTemplate)
+	if err != nil {
+		log.Fatal("t.Parse ", err)
+	}
+	context := &EmailData{
+		"Notifier <sender@example.com>",
+		"recipient@example.com",
+		"Email subject line",
+		"Email body!\n\nPretty awesome.",
+	}
+	err = t.Execute(&doc, context)
+	if err != nil {
+		log.Fatal("t.Execute ", err)
+	}
+
+	auth := smtp.PlainAuth("", "", "", "localhost:1025")
+	err = smtp.SendMail("localhost:1025", auth, "", []string{"recipient@example.com"}, doc.Bytes())
+	if err != nil {
+		log.Fatal("smtp.SendMail ", err)
+	}
 }
 
 func main() {

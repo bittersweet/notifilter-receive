@@ -49,7 +49,7 @@ func (n *Notifier) checkRules(s *Stat) bool {
 	rules_met := true
 	for _, rule := range rules {
 		if !rule.Met(s) {
-			fmt.Printf("Rule not met -- Key: %s, Type: %s, Setting %s, Value %s\n", rule.Key, rule.Type, rule.Setting, rule.Value)
+			fmt.Printf("Rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v\n", rule.Key, rule.Type, rule.Setting, rule.Value, s.toMap()[rule.Key])
 			rules_met = false
 		}
 	}

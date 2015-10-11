@@ -17,7 +17,7 @@ func TestNotifierCheckRulesSingle(t *testing.T) {
 		Rules:            rules,
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
 	s := Stat{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)
@@ -34,7 +34,7 @@ func TestNotifierCheckRulesMultiple(t *testing.T) {
 		Rules:            rules,
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
 	s := Stat{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)
@@ -66,7 +66,7 @@ func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 		Rules:            rules,
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
 	s := Stat{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)

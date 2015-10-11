@@ -171,3 +171,22 @@ func TestNotifierRenderTemplateWithLogic(t *testing.T) {
 	expected = "inactive"
 	assert.Equal(t, result, expected)
 }
+
+func TestNotifierRenderTemplateWithAdvancedLogic(t *testing.T) {
+	n := Notifier{}
+	n.Template = `Incoming conversion: {{ if gt .number 10.0 }}(Making it rain!) {{ end }}{{ .number }}`
+
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	s := Stat{"Mark", jt}
+
+	result := n.renderTemplate(&s)
+	expected := "Incoming conversion: (Making it rain!) 12"
+	assert.Equal(t, string(result), expected)
+
+	jt = types.JsonText(`{"active": true, "name": "Go", "number": 10}`)
+	s = Stat{"Mark", jt}
+
+	result = n.renderTemplate(&s)
+	expected = "Incoming conversion: 10"
+	assert.Equal(t, string(result), expected)
+}

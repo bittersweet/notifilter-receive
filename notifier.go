@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"log"
 	"text/template"
 
 	"github.com/bittersweet/notifilter/notifiers"
@@ -43,12 +42,12 @@ func (n *Notifier) checkRules(e *Event) bool {
 	rulesMet := true
 	for _, rule := range rules {
 		if !rule.Met(e) {
-			log.Printf("Rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v\n", rule.Key, rule.Type, rule.Setting, rule.Value, e.toMap()[rule.Key])
+			e.log("[NOTIFY] rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v", rule.Key, rule.Type, rule.Setting, rule.Value, e.toMap()[rule.Key])
 			rulesMet = false
 		}
 	}
 	if !rulesMet {
-		log.Printf("Stopping notification of id: %d, rules not met\n", n.ID)
+		e.log("[NOTIFY] Stopping notification of id: %d, rules not met", n.ID)
 		return false
 	}
 
@@ -75,7 +74,7 @@ func (n *Notifier) renderTemplate(e *Event) ([]byte, error) {
 
 func (n *Notifier) notify(e *Event, mn notifiers.MessageNotifier) {
 	nt := n.NotificationType
-	log.Printf("Notifying notifier id: %d type: %s\n", n.ID, nt)
+	e.log("[NOTIFY] Notifying notifier id: %d type: %s", n.ID, nt)
 
 	if !n.checkRules(e) {
 		return
@@ -83,5 +82,5 @@ func (n *Notifier) notify(e *Event, mn notifiers.MessageNotifier) {
 
 	message, _ := n.renderTemplate(e)
 	mn.SendMessage(e.Identifier, n.Target, message)
-	log.Printf("Notifying notifier id: %d done\n", n.ID)
+	e.log("[NOTIFY] Notifying notifier id: %d done", n.ID)
 }

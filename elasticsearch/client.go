@@ -11,8 +11,8 @@ import (
 )
 
 // Persist saves incoming events to Elasticsearch
-func Persist(application string, name string, data map[string]interface{}) error {
-	log.Printf("[ES] persisting application=%s event=%s data=%v\n", application, name, data)
+func Persist(requestID string, application string, name string, data map[string]interface{}) error {
+	log.Printf("%s [ES] persisting application=%s event=%s data=%v\n", requestID, application, name, data)
 
 	payload := struct {
 		Application string                 `json:"application"`
@@ -36,7 +36,7 @@ func Persist(application string, name string, data map[string]interface{}) error
 	if err != nil {
 		return err
 	}
-	log.Println("[ES] Success")
+	log.Printf("%s [ES] persisted\n", requestID)
 	return nil
 }
 

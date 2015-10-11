@@ -1,12 +1,14 @@
 package main
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"runtime"
+	"time"
 
 	"github.com/bittersweet/notifilter/elasticsearch"
 	"github.com/jmoiron/sqlx"
@@ -20,8 +22,9 @@ var db *sqlx.DB
 
 // Event will hold incoming data and will be persisted to ES eventually
 type Event struct {
-	Application string         `json:"application"`
-	Identifier  string         `json:"identifier"`
+	Application string `json:"application"`
+	Identifier  string `json:"identifier"`
+	requestID   string
 	Data        types.JsonText `json:"data"`
 }
 
@@ -34,9 +37,9 @@ func (e *Event) toMap() map[string]interface{} {
 
 // persist saves the incoming event to Elasticsearch
 func (e *Event) persist() {
-	err := elasticsearch.Persist(e.Application, e.Identifier, e.toMap())
+	err := elasticsearch.Persist(e.requestID, e.Application, e.Identifier, e.toMap())
 	if err != nil {
-		log.Fatal("Error persisting to ElasticSearch:", err)
+		e.log("Error persisting to ElasticSearch:", err)
 	}
 }
 
@@ -48,12 +51,17 @@ func (e *Event) notify() {
 	if err != nil {
 		log.Fatal("db.Select ", err)
 	}
-	fmt.Printf("Found %d notifiers\n", len(notifiers))
+	e.log("[NOTIFY] found %d notifiers", len(notifiers))
 
 	for i := 0; i < len(notifiers); i++ {
 		notifier := notifiers[i]
 		notifier.notify(e, notifier.newNotifier())
 	}
+}
+
+func (e *Event) log(msg string, args ...interface{}) {
+	logStr := fmt.Sprintf(msg, args...)
+	log.Printf("%s %s\n", e.requestID, logStr)
 }
 
 // incomingItems creates a channel that we can place events on so the main loop
@@ -66,6 +74,18 @@ func incomingItems() chan<- []byte {
 	// If we do not buffer any event that gets sent to the channel will be
 	// dropped if we can not handle it.
 	tasks := make(chan Event, 10000)
+
+	// Generate unique ID to tag requests
+	// Thanks to https://blog.cloudflare.com/go-at-cloudflare/
+	idGenerator := make(chan string)
+	go func() {
+		h := sha1.New()
+		c := []byte(time.Now().String())
+		for {
+			h.Write(c)
+			idGenerator <- fmt.Sprintf("%x", h.Sum(nil))
+		}
+	}()
 
 	// Use 4 workers that will concurrently grab Events of the channel and
 	// persist+notify
@@ -87,6 +107,8 @@ func incomingItems() chan<- []byte {
 				if err != nil {
 					log.Println(err)
 				}
+				requestID := <-idGenerator
+				event.requestID = requestID
 				tasks <- event
 			}
 		}

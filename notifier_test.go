@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/bittersweet/notifilter/notifiers"
@@ -144,9 +145,40 @@ func TestNotifierRenderTemplate(t *testing.T) {
 	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
-	result := n.renderTemplate(&event)
+	result, err := n.renderTemplate(&event)
 	expected := []byte("name: Go")
 	assert.Equal(t, result, expected)
+	assert.Nil(t, err)
+}
+
+func TestNotifierRenderWithInvalidTemplate(t *testing.T) {
+	n := Notifier{
+		Template: "name: {{.name}",
+	}
+
+	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	event := setupTestNotifier(data)
+
+	result, err := n.renderTemplate(&event)
+	expected := []byte("")
+	assert.Equal(t, result, expected)
+	assert.NotNil(t, err)
+	assert.Equal(t, "template: notificationTemplate:1: unexpected \"}\" in operand", err.Error())
+}
+
+func TestNotifierRenderWithInvalidData(t *testing.T) {
+	n := Notifier{
+		Template: "name: {{.name}}",
+	}
+
+	data := types.JsonText(`{"active": true}`)
+	event := setupTestNotifier(data)
+
+	result, err := n.renderTemplate(&event)
+	expected := []byte("name: <no value>")
+	fmt.Println("resut, ", string(result))
+	assert.Equal(t, expected, result)
+	assert.Nil(t, err)
 }
 
 func TestNotifierRenderTemplateWithLogic(t *testing.T) {
@@ -158,14 +190,14 @@ func TestNotifierRenderTemplateWithLogic(t *testing.T) {
 	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
-	result := n.renderTemplate(&event)
+	result, _ := n.renderTemplate(&event)
 	expected := []byte("Active!")
 	assert.Equal(t, result, expected)
 
 	data = types.JsonText(`{"active": false, "name": "Go", "number": 12}`)
 	event = Event{"signup", data}
 
-	result = n.renderTemplate(&event)
+	result, _ = n.renderTemplate(&event)
 	expected = []byte("inactive")
 	assert.Equal(t, result, expected)
 }
@@ -177,14 +209,14 @@ func TestNotifierRenderTemplateWithAdvancedLogic(t *testing.T) {
 	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
-	result := n.renderTemplate(&event)
+	result, _ := n.renderTemplate(&event)
 	expected := "Incoming conversion: (Making it rain!) 12"
 	assert.Equal(t, string(result), expected)
 
 	data = types.JsonText(`{"active": true, "name": "Go", "number": 10}`)
 	event = setupTestNotifier(data)
 
-	result = n.renderTemplate(&event)
+	result, _ = n.renderTemplate(&event)
 	expected = "Incoming conversion: 10"
 	assert.Equal(t, string(result), expected)
 }

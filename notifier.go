@@ -54,22 +54,22 @@ func (n *Notifier) checkRules(e *Event) bool {
 	return true
 }
 
-func (n *Notifier) renderTemplate(e *Event) []byte {
+func (n *Notifier) renderTemplate(e *Event) ([]byte, error) {
 	var err error
 	var doc bytes.Buffer
 
 	t := template.New("notificationTemplate")
 	t, err = t.Parse(n.Template)
 	if err != nil {
-		log.Fatal("t.Parse of n.Template", err)
+		return []byte(""), err
 	}
 
 	err = t.Execute(&doc, e.toMap())
 	if err != nil {
-		log.Fatal("t.Execute ", err)
+		return []byte(""), err
 	}
 
-	return doc.Bytes()
+	return doc.Bytes(), nil
 }
 
 func (n *Notifier) notify(e *Event, mn notifiers.MessageNotifier) {
@@ -80,7 +80,7 @@ func (n *Notifier) notify(e *Event, mn notifiers.MessageNotifier) {
 		return
 	}
 
-	message := n.renderTemplate(e)
+	message, _ := n.renderTemplate(e)
 	mn.SendMessage(e.Identifier, n.Target, message)
 	log.Printf("Notifying notifier id: %d done\n", n.ID)
 }

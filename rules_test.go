@@ -58,6 +58,19 @@ func TestBoolTrue(t *testing.T) {
 	assert.Equal(t, true, result)
 }
 
+func TestStringDoesMatch(t *testing.T) {
+	event := setupTestNotifier(jt)
+
+	r := rule{
+		Key:   "name",
+		Type:  "string",
+		Value: "Go",
+	}
+
+	result := r.Met(&event)
+	assert.Equal(t, true, result)
+}
+
 func TestStringDoesNotMatch(t *testing.T) {
 	event := setupTestNotifier(jt)
 
@@ -71,13 +84,28 @@ func TestStringDoesNotMatch(t *testing.T) {
 	assert.Equal(t, false, result)
 }
 
-func TestStringDoesMatch(t *testing.T) {
+func TestStringNotEqualIsEqual(t *testing.T) {
 	event := setupTestNotifier(jt)
 
 	r := rule{
-		Key:   "name",
-		Type:  "string",
-		Value: "Go",
+		Key:     "name",
+		Type:    "string",
+		Setting: "noteq",
+		Value:   "Go",
+	}
+
+	result := r.Met(&event)
+	assert.Equal(t, false, result)
+}
+
+func TestStringNotEqualIsNotEqual(t *testing.T) {
+	event := setupTestNotifier(jt)
+
+	r := rule{
+		Key:     "name",
+		Type:    "string",
+		Setting: "noteq",
+		Value:   "NotGo",
 	}
 
 	result := r.Met(&event)

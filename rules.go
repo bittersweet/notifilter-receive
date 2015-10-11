@@ -51,7 +51,20 @@ func metBool(r *rule, parsed map[string]interface{}) bool {
 func metString(r *rule, parsed map[string]interface{}) bool {
 	val := parsed[r.Key]
 	neededVal := r.Value
-	if val.(string) != neededVal {
+
+	str := val.(string)
+
+	if r.Setting == "noteq" {
+		if str == neededVal {
+			// We need not equal and string is equal
+			return false
+		} else {
+			// We need not equal and string is not equal
+			return true
+		}
+	}
+
+	if str != neededVal {
 		return false
 	}
 

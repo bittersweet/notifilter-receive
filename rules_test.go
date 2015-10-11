@@ -10,7 +10,7 @@ import (
 var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 
 func TestRuleKeyDoesNotMatch(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key: "notactive",
@@ -21,7 +21,7 @@ func TestRuleKeyDoesNotMatch(t *testing.T) {
 }
 
 func TestRuleKeyDoesMatch(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key: "active",
@@ -33,7 +33,7 @@ func TestRuleKeyDoesMatch(t *testing.T) {
 
 func TestBoolFalse(t *testing.T) {
 	jt := types.JsonText(`{"active": false}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:   "active",
@@ -46,7 +46,7 @@ func TestBoolFalse(t *testing.T) {
 }
 
 func TestBoolTrue(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:   "active",
@@ -59,7 +59,7 @@ func TestBoolTrue(t *testing.T) {
 }
 
 func TestStringDoesNotMatch(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:   "name",
@@ -72,7 +72,7 @@ func TestStringDoesNotMatch(t *testing.T) {
 }
 
 func TestStringDoesMatch(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:   "name",
@@ -85,7 +85,7 @@ func TestStringDoesMatch(t *testing.T) {
 }
 
 func TestNumberDoesNotEqual(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:     "number",
@@ -99,7 +99,7 @@ func TestNumberDoesNotEqual(t *testing.T) {
 }
 
 func TestNumberEqual(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:     "number",
@@ -113,7 +113,7 @@ func TestNumberEqual(t *testing.T) {
 }
 
 func TestNumberNotGt(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:     "number",
@@ -127,7 +127,7 @@ func TestNumberNotGt(t *testing.T) {
 }
 
 func TestNumberNotGtEqual(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:     "number",
@@ -141,7 +141,7 @@ func TestNumberNotGtEqual(t *testing.T) {
 }
 
 func TestNumberGt(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:     "number",
@@ -155,7 +155,7 @@ func TestNumberGt(t *testing.T) {
 }
 
 func TestNumberNotLt(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:     "number",
@@ -169,7 +169,7 @@ func TestNumberNotLt(t *testing.T) {
 }
 
 func TestNumberNotLtEqual(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:     "number",
@@ -183,7 +183,7 @@ func TestNumberNotLtEqual(t *testing.T) {
 }
 
 func TestNumberLt(t *testing.T) {
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	r := Rule{
 		Key:     "number",

@@ -44,12 +44,12 @@ func (n *Notifier) getRules() []*Rule {
 	return rules
 }
 
-func (n *Notifier) checkRules(s *Stat) bool {
+func (n *Notifier) checkRules(e *Event) bool {
 	rules := n.getRules()
 	rules_met := true
 	for _, rule := range rules {
-		if !rule.Met(s) {
-			fmt.Printf("Rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v\n", rule.Key, rule.Type, rule.Setting, rule.Value, s.toMap()[rule.Key])
+		if !rule.Met(e) {
+			fmt.Printf("Rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v\n", rule.Key, rule.Type, rule.Setting, rule.Value, e.toMap()[rule.Key])
 			rules_met = false
 		}
 	}
@@ -61,7 +61,7 @@ func (n *Notifier) checkRules(s *Stat) bool {
 	return true
 }
 
-func (n *Notifier) renderTemplate(s *Stat) []byte {
+func (n *Notifier) renderTemplate(s *Event) []byte {
 	var err error
 	var doc bytes.Buffer
 
@@ -79,7 +79,7 @@ func (n *Notifier) renderTemplate(s *Stat) []byte {
 	return doc.Bytes()
 }
 
-func (n *Notifier) notify(s *Stat, mn MessageNotifier) {
+func (n *Notifier) notify(s *Event, mn MessageNotifier) {
 	nt := n.NotificationType
 	fmt.Printf("Notifying notifier id: %d type: %s\n", n.Id, nt)
 

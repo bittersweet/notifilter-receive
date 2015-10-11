@@ -22,7 +22,7 @@ const maxPacketSize = 1024 * 1024
 var db *sqlx.DB
 var keys = set.New()
 
-type Stat struct {
+type Event struct {
 	Key   string         `json:"key"`
 	Value types.JsonText `json:"value"`
 }
@@ -69,39 +69,39 @@ func (i *Incoming) toMap() map[string]interface{} {
 	return parsed
 }
 
-func (s *Stat) toMap() map[string]interface{} {
+func (e *Event) toMap() map[string]interface{} {
 	m := map[string]interface{}{}
-	s.Value.Unmarshal(&m)
+	e.Value.Unmarshal(&m)
 	return m
 }
 
-func (s *Stat) persist() {
+func (e *Event) persist() {
 	var incomingId int
 	query := `INSERT INTO incoming(received_at, class, data) VALUES($1, $2, $3) RETURNING id`
-	err := db.QueryRow(query, time.Now(), s.Key, s.Value).Scan(&incomingId)
+	err := db.QueryRow(query, time.Now(), e.Key, e.Value).Scan(&incomingId)
 	if err != nil {
 		log.Fatal("persist()", err)
 	}
-	fmt.Printf("class: %s id: %d\n", s.Key, incomingId)
+	fmt.Printf("class: %s id: %d\n", e.Key, incomingId)
 }
 
-func (s *Stat) notify() {
+func (e *Event) notify() {
 	notifiers := []Notifier{}
-	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", s.Key)
+	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", e.Key)
 	if err != nil {
 		log.Fatal("db.Select ", err)
 	}
-	fmt.Printf("Incoming data: %v\n", s.toMap())
+	fmt.Printf("Incoming data: %v\n", e.toMap())
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
 
 	go func() {
 		payload := ESPayload{
-			Key:  s.Key,
+			Key:  e.Key,
 			Day:  1,
-			Data: s.toMap(),
+			Data: e.toMap(),
 		}
 		body, _ := json.Marshal(payload)
-		resp, err := http.Post("http://localhost:9200/notifilter/incoming/?pretty", "application/json", bytes.NewReader(body))
+		resp, err := http.Post("http://localhost:9200/notifilter/event/?pretty", "application/json", bytes.NewReader(body))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -115,14 +115,14 @@ func (s *Stat) notify() {
 
 	for i := 0; i < len(notifiers); i++ {
 		notifier := notifiers[i]
-		notifier.notify(s, notifier.newNotifier())
+		notifier.notify(e, notifier.newNotifier())
 	}
 }
 
-func (s *Stat) keys() []string {
-	sMap := s.toMap()
-	keys := make([]string, 0, len(sMap))
-	for k := range sMap {
+func (e *Event) keys() []string {
+	eMap := e.toMap()
+	keys := make([]string, 0, len(eMap))
+	for k := range eMap {
 		keys = append(keys, k)
 	}
 	return keys
@@ -149,15 +149,15 @@ func incomingItems() chan<- []byte {
 				i = i + 1
 				fmt.Println(i)
 
-				var stat Stat
-				err := json.Unmarshal(b, &stat)
+				var Event Event
+				err := json.Unmarshal(b, &Event)
 				if err != nil {
 					log.Println(err)
-					log.Printf("%+v\n", stat)
+					log.Printf("%+v\n", Event)
 				}
-				stat.persist()
-				// updates <- stat.keys()
-				stat.notify()
+				Event.persist()
+				// updates <- Event.keys()
+				Event.notify()
 				// fmt.Println(string(b))
 			}
 		}
@@ -182,10 +182,6 @@ func listenToUDP(conn *net.UDPConn) {
 		msg := make([]byte, bytes)
 		copy(msg, buffer)
 		incomingChan <- msg
-
-		// stat.persist()
-		// updates <- stat.keys()
-		// stat.notify()
 	}
 }
 

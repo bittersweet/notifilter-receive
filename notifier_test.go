@@ -43,7 +43,7 @@ func TestNotifierCheckRulesSingle(t *testing.T) {
 	}
 
 	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)
 }
@@ -60,7 +60,7 @@ func TestNotifierCheckRulesMultiple(t *testing.T) {
 	}
 
 	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)
 }
@@ -76,7 +76,7 @@ func TestNotifierCheckRulesSettingIsNull(t *testing.T) {
 	}
 
 	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)
 }
@@ -92,7 +92,7 @@ func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 	}
 
 	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)
 }
@@ -106,7 +106,7 @@ func TestNotifierNotify(t *testing.T) {
 	}
 
 	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	mn := &LocalMessageNotifier{}
 	n.notify(&s, mn)
@@ -127,7 +127,7 @@ func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
 	}
 
 	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 0}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	mn := &LocalMessageNotifier{}
 	n.notify(&s, mn)
@@ -144,7 +144,7 @@ func TestNotifierRenderTemplate(t *testing.T) {
 	}
 
 	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	result := n.renderTemplate(&s)
 	expected := []byte("name: Go")
@@ -158,14 +158,14 @@ func TestNotifierRenderTemplateWithLogic(t *testing.T) {
 	}
 
 	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	result := n.renderTemplate(&s)
 	expected := []byte("Active!")
 	assert.Equal(t, result, expected)
 
 	jt = types.JsonText(`{"active": false, "name": "Go", "number": 12}`)
-	s = Stat{"Mark", jt}
+	s = Event{"Mark", jt}
 
 	result = n.renderTemplate(&s)
 	expected = []byte("inactive")
@@ -177,14 +177,14 @@ func TestNotifierRenderTemplateWithAdvancedLogic(t *testing.T) {
 	n.Template = `Incoming conversion: {{ if gt .number 10.0 }}(Making it rain!) {{ end }}{{ .number }}`
 
 	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
-	s := Stat{"Mark", jt}
+	s := Event{"Mark", jt}
 
 	result := n.renderTemplate(&s)
 	expected := "Incoming conversion: (Making it rain!) 12"
 	assert.Equal(t, string(result), expected)
 
 	jt = types.JsonText(`{"active": true, "name": "Go", "number": 10}`)
-	s = Stat{"Mark", jt}
+	s = Event{"Mark", jt}
 
 	result = n.renderTemplate(&s)
 	expected = "Incoming conversion: 10"

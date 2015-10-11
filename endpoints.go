@@ -152,6 +152,7 @@ func handlePreview(w http.ResponseWriter, r *http.Request) {
 	incoming := Incoming{}
 	err = db.Get(&incoming, "SELECT * FROM incoming WHERE class=$1 ORDER BY id DESC LIMIT 1", class)
 
+	fmt.Printf("%#v\n", incoming)
 	t := template.New("notificationTemplate")
 	t, err = t.Parse(incomingTemplate)
 	if err != nil {

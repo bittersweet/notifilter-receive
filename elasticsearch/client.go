@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// ESPayload is a struct that we convert to JSON to send data to ES
 type ESPayload struct {
 	Name       string                 `json:"name"`
 	ReceivedAt time.Time              `json:"received_at"`
@@ -31,7 +32,7 @@ func Persist(name string, data map[string]interface{}) error {
 		return err
 	}
 	defer resp.Body.Close()
-	body, err = ioutil.ReadAll(resp.Body)
+	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}

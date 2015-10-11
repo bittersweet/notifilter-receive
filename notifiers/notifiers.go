@@ -1,7 +1,6 @@
 package notifiers
 
-// Every notifier we create needs to adhere to this interface, so we can
-// substitute another one when testing
+// MessageNotifier defines our interface that all our notifications need to adhere too, also handy to swap out in test
 type MessageNotifier interface {
 	SendMessage(string, string, []byte)
 }

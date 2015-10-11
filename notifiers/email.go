@@ -7,6 +7,7 @@ import (
 	"text/template"
 )
 
+// EmailNotifier is a notifier accountable for e-mailing notifications
 type EmailNotifier struct {
 }
 
@@ -22,14 +23,15 @@ Content-Type: text/html; charset="UTF-8"
 </body>
 </html>`
 
-type EmailData struct {
+type emailData struct {
 	From    string
 	To      string
 	Subject string
 	Body    string
 }
 
-func (e *EmailNotifier) SendMessage(event_name string, target string, data []byte) {
+// SendMessage sends an event with processed data to a selected email address (target)
+func (e *EmailNotifier) SendMessage(eventName string, target string, data []byte) {
 	var err error
 	var doc bytes.Buffer
 
@@ -38,7 +40,7 @@ func (e *EmailNotifier) SendMessage(event_name string, target string, data []byt
 	if err != nil {
 		log.Fatal("t.Parse ", err)
 	}
-	context := &EmailData{
+	context := &emailData{
 		From:    "Springest Dev <developers@springest.nl>",
 		To:      target,
 		Subject: "Email subject line",

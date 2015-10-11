@@ -9,10 +9,12 @@ import (
 	"net/url"
 )
 
+// SlackNotifier is a notifier accountable for sending notifications to Slack
 type SlackNotifier struct {
 }
 
-func (s *SlackNotifier) SendMessage(event_name string, target string, data []byte) {
+// SendMessage sends an event with processed data to a selected Slack channel (target)
+func (s *SlackNotifier) SendMessage(eventName string, target string, data []byte) {
 	// https://api.slack.com/methods/chat.postMessage
 	// TODO: get an application token instead of using a personal one
 	token := "xoxp-2152199637-2401973798-4106776238-a6cdd3"

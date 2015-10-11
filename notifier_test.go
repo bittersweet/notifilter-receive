@@ -9,17 +9,17 @@ import (
 )
 
 type LocalMessageNotifier struct {
-	event_name string
-	target     string
-	message    []byte
-	processed  bool
+	EventName string
+	Target    string
+	Message   []byte
+	Processed bool
 }
 
-func (mn *LocalMessageNotifier) SendMessage(event_name string, target string, data []byte) {
-	mn.event_name = event_name
-	mn.target = target
-	mn.message = data
-	mn.processed = true
+func (mn *LocalMessageNotifier) SendMessage(eventName string, target string, data []byte) {
+	mn.EventName = eventName
+	mn.Target = target
+	mn.Message = data
+	mn.Processed = true
 }
 
 func newNotifier(data types.JsonText) Event {
@@ -40,7 +40,6 @@ func TestNewNotifier(t *testing.T) {
 func TestNotifierCheckRulesSingle(t *testing.T) {
 	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "eq", "value": "12"}]`)
 	n := Notifier{
-		Id:               1,
 		NotificationType: "email",
 		EventName:        "User",
 		Template:         "name: {{.name}}",
@@ -54,10 +53,8 @@ func TestNotifierCheckRulesSingle(t *testing.T) {
 }
 
 func TestNotifierCheckRulesMultiple(t *testing.T) {
-	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "eq", "value": "12"},
-	{"key": "name", "type": "string", "setting": null, "value": "Go"}]`)
+	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "eq", "value": "12"}, {"key": "name", "type": "string", "setting": null, "value": "Go"}]`)
 	n := Notifier{
-		Id:               1,
 		NotificationType: "email",
 		EventName:        "User",
 		Template:         "name: {{.name}}",
@@ -73,7 +70,6 @@ func TestNotifierCheckRulesMultiple(t *testing.T) {
 func TestNotifierCheckRulesSettingIsNull(t *testing.T) {
 	var rules = types.JsonText(`[{"key": "name", "type": "string", "setting": null "value": "Go"}]`)
 	n := Notifier{
-		Id:               1,
 		NotificationType: "email",
 		EventName:        "User",
 		Template:         "name: {{.name}}",
@@ -89,7 +85,6 @@ func TestNotifierCheckRulesSettingIsNull(t *testing.T) {
 func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 	var rules = types.JsonText(`[{"key": "name", "type": "string", "setting": "", "value": "Go"}]`)
 	n := Notifier{
-		Id:               1,
 		NotificationType: "email",
 		EventName:        "User",
 		Template:         "name: {{.name}}",
@@ -104,7 +99,6 @@ func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 
 func TestNotifierNotify(t *testing.T) {
 	n := Notifier{
-		Id:               1,
 		EventName:        "User",
 		Template:         "name: {{.name}}",
 		NotificationType: "email",
@@ -117,15 +111,14 @@ func TestNotifierNotify(t *testing.T) {
 	mn := &LocalMessageNotifier{}
 	n.notify(&event, mn)
 
-	assert.Equal(t, mn.event_name, "signup")
-	assert.Equal(t, mn.message, []byte("name: Go"))
-	assert.Equal(t, mn.processed, true)
+	assert.Equal(t, mn.EventName, "signup")
+	assert.Equal(t, mn.Message, []byte("name: Go"))
+	assert.Equal(t, mn.Processed, true)
 }
 
 func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
 	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "gt", "value": "1"}]`)
 	n := Notifier{
-		Id:               1,
 		EventName:        "User",
 		Template:         "name: {{.name}}",
 		Rules:            rules,
@@ -138,12 +131,11 @@ func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
 	mn := &LocalMessageNotifier{}
 	n.notify(&event, mn)
 
-	assert.Equal(t, mn.processed, false)
+	assert.Equal(t, mn.Processed, false)
 }
 
 func TestNotifierRenderTemplate(t *testing.T) {
 	n := Notifier{
-		Id:               1,
 		EventName:        "User",
 		Template:         "name: {{.name}}",
 		NotificationType: "email",

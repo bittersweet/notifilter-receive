@@ -12,7 +12,7 @@ var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 func TestRuleKeyDoesNotMatch(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key: "notactive",
 	}
 
@@ -23,7 +23,7 @@ func TestRuleKeyDoesNotMatch(t *testing.T) {
 func TestRuleKeyDoesMatch(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key: "active",
 	}
 
@@ -35,7 +35,7 @@ func TestBoolFalse(t *testing.T) {
 	jt := types.JsonText(`{"active": false}`)
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:   "active",
 		Type:  "boolean",
 		Value: "true",
@@ -48,7 +48,7 @@ func TestBoolFalse(t *testing.T) {
 func TestBoolTrue(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:   "active",
 		Type:  "boolean",
 		Value: "true",
@@ -61,7 +61,7 @@ func TestBoolTrue(t *testing.T) {
 func TestStringDoesNotMatch(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:   "name",
 		Type:  "string",
 		Value: "NotGo",
@@ -74,7 +74,7 @@ func TestStringDoesNotMatch(t *testing.T) {
 func TestStringDoesMatch(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:   "name",
 		Type:  "string",
 		Value: "Go",
@@ -87,7 +87,7 @@ func TestStringDoesMatch(t *testing.T) {
 func TestNumberDoesNotEqual(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:     "number",
 		Type:    "number",
 		Setting: "eq",
@@ -101,7 +101,7 @@ func TestNumberDoesNotEqual(t *testing.T) {
 func TestNumberEqual(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:     "number",
 		Type:    "number",
 		Setting: "eq",
@@ -115,7 +115,7 @@ func TestNumberEqual(t *testing.T) {
 func TestNumberNotGt(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:     "number",
 		Type:    "number",
 		Setting: "gt",
@@ -129,7 +129,7 @@ func TestNumberNotGt(t *testing.T) {
 func TestNumberNotGtEqual(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:     "number",
 		Type:    "number",
 		Setting: "gt",
@@ -143,7 +143,7 @@ func TestNumberNotGtEqual(t *testing.T) {
 func TestNumberGt(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:     "number",
 		Type:    "number",
 		Setting: "gt",
@@ -157,7 +157,7 @@ func TestNumberGt(t *testing.T) {
 func TestNumberNotLt(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:     "number",
 		Type:    "number",
 		Setting: "lt",
@@ -171,7 +171,7 @@ func TestNumberNotLt(t *testing.T) {
 func TestNumberNotLtEqual(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:     "number",
 		Type:    "number",
 		Setting: "lt",
@@ -185,7 +185,7 @@ func TestNumberNotLtEqual(t *testing.T) {
 func TestNumberLt(t *testing.T) {
 	s := Event{"Mark", jt}
 
-	r := Rule{
+	r := rule{
 		Key:     "number",
 		Type:    "number",
 		Setting: "lt",

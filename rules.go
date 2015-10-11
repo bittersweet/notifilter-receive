@@ -6,14 +6,14 @@ import (
 	"strconv"
 )
 
-type Rule struct {
+type rule struct {
 	Key     string `json:"key"`
 	Type    string `json:"type"`
 	Setting string `json:"setting"`
 	Value   string `json:"value"`
 }
 
-func (r *Rule) Met(e *Event) bool {
+func (r *rule) Met(e *Event) bool {
 	var parsed map[string]interface{}
 	err := json.Unmarshal([]byte(e.Data), &parsed)
 	if err != nil {
@@ -38,41 +38,41 @@ func (r *Rule) Met(e *Event) bool {
 	return true
 }
 
-func metBool(r *Rule, parsed map[string]interface{}) bool {
+func metBool(r *rule, parsed map[string]interface{}) bool {
 	val := parsed[r.Key]
-	needed_val, _ := strconv.ParseBool(r.Value)
-	if val.(bool) != needed_val {
+	neededVal, _ := strconv.ParseBool(r.Value)
+	if val.(bool) != neededVal {
 		return false
 	}
 
 	return true
 }
 
-func metString(r *Rule, parsed map[string]interface{}) bool {
+func metString(r *rule, parsed map[string]interface{}) bool {
 	val := parsed[r.Key]
-	needed_val := r.Value
-	if val.(string) != needed_val {
+	neededVal := r.Value
+	if val.(string) != neededVal {
 		return false
 	}
 
 	return true
 }
 
-func metNumber(r *Rule, parsed map[string]interface{}) bool {
+func metNumber(r *rule, parsed map[string]interface{}) bool {
 	val := parsed[r.Key].(float64)
-	needed_val, _ := strconv.ParseFloat(r.Value, 64)
+	neededVal, _ := strconv.ParseFloat(r.Value, 64)
 
 	switch r.Setting {
 	case "eq":
-		if val != needed_val {
+		if val != neededVal {
 			return false
 		}
 	case "gt":
-		if val <= needed_val {
+		if val <= neededVal {
 			return false
 		}
 	case "lt":
-		if val >= needed_val {
+		if val >= neededVal {
 			return false
 		}
 	}

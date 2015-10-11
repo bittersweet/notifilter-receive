@@ -18,7 +18,7 @@ const maxPacketSize = 1024 * 1024
 
 var db *sqlx.DB
 
-// Struct that will keep incoming data
+// Event will hold incoming data and will be persisted to ES eventually
 type Event struct {
 	Identifier string         `json:"identifier"`
 	Data       types.JsonText `json:"data"`
@@ -81,12 +81,12 @@ func incomingItems() chan<- []byte {
 		for {
 			select {
 			case b := <-incomingChan:
-				var Event Event
-				err := json.Unmarshal(b, &Event)
+				var event Event
+				err := json.Unmarshal(b, &event)
 				if err != nil {
 					log.Println(err)
 				}
-				tasks <- Event
+				tasks <- event
 			}
 		}
 	}()

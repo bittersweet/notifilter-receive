@@ -1,8 +1,15 @@
 <html>
   <head>
+    <title>Notifier</title>
+
+    <style>
+      table {
+        padding: 20px 0 20px 0;
+      }
+    </style>
   </head>
   <body>
-    Notifiers:
+    <a href="/new">Create new notifier</a>
     <table>
       <tr>
         <th>id</th>
@@ -15,7 +22,7 @@
           <td>{{$notifier.Id}}</td>
           <td>{{$notifier.NotificationType}}</td>
           <td>{{$notifier.Class}}</td>
-          <td style="background: red;">{{$notifier.Template}}</td>
+          <td>{{$notifier.Template}}</td>
         </tr>
       {{ end }}
     </table>

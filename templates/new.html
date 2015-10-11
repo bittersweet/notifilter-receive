@@ -1,0 +1,123 @@
+<html>
+  <head>
+    <title>Trying out generating</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    <style>
+      * {
+        font-size: 18px;
+      }
+
+      form {
+        padding-bottom: 20px;
+      }
+
+      textarea#rules {
+        padding-bottom: 20px;
+        display: block;
+      }
+
+      .ruleSet {
+        padding-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/create" id="notifierForm">
+      <select name="notification_type">
+        <option value="slack">slack</option>
+        <option value="email">email</option>
+      </select>
+      <br><br>
+      <select name="class">
+        <option value="User">User</option>
+        <option value="Review">Review</option>
+      </select>
+      <br><br>
+      <textarea rows="4" cols="50" name="template" id="template"></textarea>
+      <br><br>
+      <textarea rows="4" cols="50" name="rules" id="rules"></textarea>
+      <br><br>
+      <input type="submit" value="Create notifier">
+    </form>
+
+    <form action="#" id="rulesForm">
+      <div id="rulesContainer">
+        <div class="ruleSet">
+          <select name="key">
+            <option value="name">name</option>
+            <option value="active">active</option>
+            <option value="number">number</option>
+            <option value="rating">rating</option>
+            <option value="domain">domain</option>
+            <option value="confirmed">confirmed</option>
+          </select>
+          <select name="type">
+            <option value="boolean">boolean</option>
+            <option value="string">string</option>
+            <option value="number">number</option>
+          </select>
+          <select name="setting">
+            <option selected value=""></option>
+            <option value="eq">eq</option>
+            <option value="gt">gt</option>
+            <option value="lt">lt</option>
+          </select>
+          <input type="text" name="value">
+        </div>
+      </div>
+      <input type="button" name="addRule" value="Add rule">
+      <input type="submit" value="Generate">
+    </form>
+    <script>
+      function duplicateSettings() {
+        var removeRule = '<input type="button" name="removeRule" value="Remove rule">';
+        el = $(".ruleSet:first").clone();
+        el.append(removeRule);
+        el.appendTo("#rulesContainer");
+      }
+
+      function generateSettingsFromFields() {
+        rules = []
+        $.each($(".ruleSet"), function(index, ruleSet) {
+          var key = $(ruleSet).children("select[name=key]").val();
+          var type = $(ruleSet).children("select[name=type]").val();
+          var setting = $(ruleSet).children("select[name=setting]").val();
+          var value = $(ruleSet).children("input[name=value]").val();
+
+          config = {
+            "key": key,
+            "type": type,
+            "setting": setting,
+            "value": value,
+          }
+
+          rules.push(config);
+        });
+
+        return rules;
+      }
+
+      $(document).ready(function() {
+        $("#rulesForm").on("submit", function(event) {
+          event.preventDefault();
+
+          rules = generateSettingsFromFields();
+          input = JSON.stringify(rules);
+
+          $("#notifierForm #rules").text(input);
+        })
+
+        $("#rulesForm input[name=addRule]").on("click", function(event) {
+          event.preventDefault();
+          duplicateSettings();
+        });
+
+        $("#rulesForm").on("click",  "input[name=removeRule]", function(event) {
+          event.preventDefault();
+          $(this).parent().remove();
+        });
+      });
+    </script>
+  </body>
+</html>

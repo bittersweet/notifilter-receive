@@ -16,8 +16,11 @@ func trackTime(start time.Time, name string) {
 	log.Printf("%s took %s\n", name, elapsed)
 }
 
+func handleFavicon(w http.ResponseWriter, r *http.Request) {
+	defer trackTime(time.Now(), "handleFavicon")
+}
+
 func handleIndex(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("== inside handleindex!!!")
 	defer trackTime(time.Now(), "handleIndex")
 
 	t, err := template.ParseFiles("templates/index.html")
@@ -47,7 +50,21 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleCreateRule(w http.ResponseWriter, r *http.Request) {
+func handleNew(w http.ResponseWriter, r *http.Request) {
+	defer trackTime(time.Now(), "handleNew")
+
+	t, err := template.ParseFiles("templates/new.html")
+	if err != nil {
+		log.Fatal("ParseFiles", err)
+	}
+
+	err = t.Execute(w, nil)
+	if err != nil {
+		log.Fatal("t.Execute", err)
+	}
+}
+
+func handleCreate(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	defer trackTime(time.Now(), "handleCreateRule")
 
@@ -74,6 +91,8 @@ func handleCreateRule(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("insert named query", err)
 	}
+
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func handleCount(w http.ResponseWriter, r *http.Request) {

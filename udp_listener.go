@@ -153,8 +153,10 @@ func main() {
 	}
 
 	go listenToUDP(conn)
+	http.HandleFunc("/favicon.ico", handleFavicon)
 	http.HandleFunc("/", handleIndex)
-	http.HandleFunc("/create", handleCreateRule)
+	http.HandleFunc("/new", handleNew)
+	http.HandleFunc("/create", handleCreate)
 	http.HandleFunc("/v1/count", handleCount)
 
 	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")

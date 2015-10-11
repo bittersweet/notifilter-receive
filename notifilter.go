@@ -89,7 +89,6 @@ func incomingItems() chan<- []byte {
 				tasks <- Event
 			}
 		}
-		close(tasks)
 	}()
 
 	fmt.Println("incomingItems launched")

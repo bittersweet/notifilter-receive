@@ -88,10 +88,10 @@ func TestNumberDoesNotEqual(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	r := Rule{
-		Key:      "number",
-		Type:     "number",
-		Optional: "eq",
-		Value:    "11",
+		Key:     "number",
+		Type:    "number",
+		Setting: "eq",
+		Value:   "11",
 	}
 
 	result := r.Met(&s)
@@ -102,10 +102,10 @@ func TestNumberEqual(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	r := Rule{
-		Key:      "number",
-		Type:     "number",
-		Optional: "eq",
-		Value:    "12",
+		Key:     "number",
+		Type:    "number",
+		Setting: "eq",
+		Value:   "12",
 	}
 
 	result := r.Met(&s)
@@ -116,10 +116,10 @@ func TestNumberNotGt(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	r := Rule{
-		Key:      "number",
-		Type:     "number",
-		Optional: "gt",
-		Value:    "13",
+		Key:     "number",
+		Type:    "number",
+		Setting: "gt",
+		Value:   "13",
 	}
 
 	result := r.Met(&s)
@@ -130,10 +130,10 @@ func TestNumberNotGtEqual(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	r := Rule{
-		Key:      "number",
-		Type:     "number",
-		Optional: "gt",
-		Value:    "12",
+		Key:     "number",
+		Type:    "number",
+		Setting: "gt",
+		Value:   "12",
 	}
 
 	result := r.Met(&s)
@@ -144,10 +144,10 @@ func TestNumberGt(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	r := Rule{
-		Key:      "number",
-		Type:     "number",
-		Optional: "gt",
-		Value:    "11",
+		Key:     "number",
+		Type:    "number",
+		Setting: "gt",
+		Value:   "11",
 	}
 
 	result := r.Met(&s)
@@ -158,10 +158,10 @@ func TestNumberNotLt(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	r := Rule{
-		Key:      "number",
-		Type:     "number",
-		Optional: "lt",
-		Value:    "11",
+		Key:     "number",
+		Type:    "number",
+		Setting: "lt",
+		Value:   "11",
 	}
 
 	result := r.Met(&s)
@@ -172,10 +172,10 @@ func TestNumberNotLtEqual(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	r := Rule{
-		Key:      "number",
-		Type:     "number",
-		Optional: "lt",
-		Value:    "12",
+		Key:     "number",
+		Type:    "number",
+		Setting: "lt",
+		Value:   "12",
 	}
 
 	result := r.Met(&s)
@@ -186,10 +186,10 @@ func TestNumberLt(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	r := Rule{
-		Key:      "number",
-		Type:     "number",
-		Optional: "lt",
-		Value:    "13",
+		Key:     "number",
+		Type:    "number",
+		Setting: "lt",
+		Value:   "13",
 	}
 
 	result := r.Met(&s)

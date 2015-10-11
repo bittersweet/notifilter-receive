@@ -7,10 +7,10 @@ import (
 )
 
 type Rule struct {
-	Key      string
-	Type     string
-	Optional string
-	Value    string
+	Key     string
+	Type    string
+	Setting string
+	Value   string
 }
 
 func (r *Rule) Met(s *Stat) bool {
@@ -27,35 +27,51 @@ func (r *Rule) Met(s *Stat) bool {
 	}
 
 	if r.Type == "boolean" {
-		val := parsed[r.Key]
-		needed_val, _ := strconv.ParseBool(r.Value)
-		if val.(bool) != needed_val {
-			return false
-		}
+		return metBool(r, parsed)
+	} else if r.Type == "string" {
+		return metString(r, parsed)
+	} else if r.Type == "number" {
+		return metNumber(r, parsed)
 	}
-	if r.Type == "string" {
-		val := parsed[r.Key]
-		needed_val := r.Value
-		if val.(string) != needed_val {
-			return false
-		}
-	}
-	if r.Type == "number" {
-		val := parsed[r.Key].(float64)
-		needed_val, _ := strconv.ParseFloat(r.Value, 64)
 
-		if r.Optional == "eq" {
-			if val != needed_val {
-				return false
-			}
-		} else if r.Optional == "gt" {
-			if val <= needed_val {
-				return false
-			}
-		} else if r.Optional == "lt" {
-			if val >= needed_val {
-				return false
-			}
+	return true
+}
+
+func metBool(r *Rule, parsed map[string]interface{}) bool {
+	val := parsed[r.Key]
+	needed_val, _ := strconv.ParseBool(r.Value)
+	if val.(bool) != needed_val {
+		return false
+	}
+
+	return true
+}
+
+func metString(r *Rule, parsed map[string]interface{}) bool {
+	val := parsed[r.Key]
+	needed_val := r.Value
+	if val.(string) != needed_val {
+		return false
+	}
+
+	return true
+}
+
+func metNumber(r *Rule, parsed map[string]interface{}) bool {
+	val := parsed[r.Key].(float64)
+	needed_val, _ := strconv.ParseFloat(r.Value, 64)
+
+	if r.Setting == "eq" {
+		if val != needed_val {
+			return false
+		}
+	} else if r.Setting == "gt" {
+		if val <= needed_val {
+			return false
+		}
+	} else if r.Setting == "lt" {
+		if val >= needed_val {
+			return false
 		}
 	}
 

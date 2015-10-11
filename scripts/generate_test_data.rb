@@ -13,6 +13,10 @@ class Stats
 
   def track(message)
     @backlog << message
+    # uncomment to enable buffering messages per 20
+    # if @backlog.size >= @batch_size
+    #   flush
+    # end
     flush
   end
 
@@ -27,6 +31,15 @@ class Stats
 end
 
 socket = UDPSocket.new
-s = Stats.new
-message = {mark: 'is cool!', number: rand(15)}
-s.track({'key' => 'mark', 'value' => message})
+jobs = []
+10.times do
+  jobs << Thread.new do
+    s = Stats.new
+    1000.times do |i|
+      data = { user_id: rand(10), created_at: Time.now }
+      s.track({'identifier' => 'signup', 'data' => data})
+    end
+  end
+end
+
+jobs.map(&:join)

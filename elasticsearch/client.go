@@ -26,7 +26,7 @@ func Persist(name string, data map[string]interface{}) error {
 		Data:       data,
 	}
 	body, _ := json.Marshal(payload)
-	resp, err := http.Post("http://localhost:9200/notifilter/event/?pretty", "application/json", bytes.NewReader(body))
+	resp, err := http.Post("http://127.0.0.1:9200/notifilter/event/?pretty", "application/json", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func EventCount() (int, error) {
 		} `json:"hits"`
 	}
 
-	resp, err := http.Get("http://localhost:9200/notifilter/event/_search?size=0")
+	resp, err := http.Get("http://127.0.0.1:9200/notifilter/event/_search?size=0")
 	if err != nil {
 		return 0, err
 	}

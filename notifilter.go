@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"runtime"
+	"sync"
 
 	"github.com/bittersweet/notifilter/elasticsearch"
 	"github.com/jmoiron/sqlx"
@@ -60,6 +61,26 @@ func (e *Event) notify() {
 func incomingItems() chan<- []byte {
 	incomingChan := make(chan []byte)
 
+	// Open a channel with a capacity of 10.000 events
+	// This will only block the sender if the buffer fills up.
+	// If we do not buffer any event that gets sent to the channel will be
+	// dropped if we can not handle it.
+	tasks := make(chan Event, 10000)
+
+	// Use 4 workers that will concurrently grab Events of the channel and
+	// persist+notify
+	var wg sync.WaitGroup
+	for i := 0; i < 4; i++ {
+		wg.Add(1)
+		go func() {
+			for event := range tasks {
+				event.persist()
+				event.notify()
+			}
+			wg.Done()
+		}()
+	}
+
 	go func() {
 		for {
 			select {
@@ -70,10 +91,10 @@ func incomingItems() chan<- []byte {
 					log.Println(err)
 					log.Printf("%+v\n", Event)
 				}
-				Event.persist()
-				Event.notify()
+				tasks <- Event
 			}
 		}
+		close(tasks)
 	}()
 
 	fmt.Println("incomingItems launched")

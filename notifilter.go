@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"runtime"
-	"sync"
 
 	"github.com/bittersweet/notifilter/elasticsearch"
 	"github.com/jmoiron/sqlx"
@@ -69,15 +68,12 @@ func incomingItems() chan<- []byte {
 
 	// Use 4 workers that will concurrently grab Events of the channel and
 	// persist+notify
-	var wg sync.WaitGroup
 	for i := 0; i < 4; i++ {
-		wg.Add(1)
 		go func() {
 			for event := range tasks {
 				event.persist()
 				event.notify()
 			}
-			wg.Done()
 		}()
 	}
 

@@ -23,10 +23,11 @@ type Stat struct {
 }
 
 type Notifier struct {
-	Id               int    `db:"id"`
-	NotificationType string `db:"notification_type"`
-	Class            string `db:"class"`
-	Template         string `db:"template"`
+	Id               int            `db:"id"`
+	NotificationType string         `db:"notification_type"`
+	Class            string         `db:"class"`
+	Template         string         `db:"template"`
+	Rules            types.JsonText `db:"rules"`
 	// type slack/email/direct to phone
 	// email address, slack channel, phone number, how to store?
 }
@@ -36,6 +37,12 @@ type Incoming struct {
 	Class      string    `db:"class"`
 	ReceivedAt time.Time `db:"received_at"`
 	Data       string    `db:"data"`
+}
+
+func (n *Notifier) GetRules() []*Rule {
+	rules := []*Rule{}
+	n.Rules.Unmarshal(&rules)
+	return rules
 }
 
 func (i *Incoming) FormattedData() string {
@@ -65,10 +72,26 @@ func (s *Stat) notify() {
 		log.Fatal("db.Select ", err)
 	}
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
+
+Notify:
 	for i := 0; i < len(notifiers); i++ {
 		notifier := notifiers[i]
 		nt := notifier.NotificationType
 		fmt.Printf("Notifying notifier id: %d type: %s\n", notifier.Id, nt)
+
+		rules := notifier.GetRules()
+		rules_met := true
+		for _, rule := range rules {
+			if !rule.Met(s) {
+				fmt.Printf("Rule not met -- Key: %s, Type: %s, Setting %s, Value %s\n", rule.Key, rule.Type, rule.Setting, rule.Value)
+				rules_met = false
+			}
+		}
+		if !rules_met {
+			fmt.Printf("Stopping notification of id: %d, rules not met\n", notifier.Id)
+			continue Notify
+		}
+
 		if nt == "email" {
 			sendEmailNotification(s, &notifier)
 		} else if nt == "slack" {

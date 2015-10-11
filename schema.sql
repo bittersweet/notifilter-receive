@@ -13,7 +13,8 @@ CREATE table notifiers(
   id serial primary key,
   notification_type character varying(20),
   class character varying(256),
-  template text
+  template text,
+  rules json
 );
 
 INSERT INTO notifiers(notification_type, class, template) VALUES ('email', 'User', 'User {{.name}} created with number: {{.number}}') RETURNING id;

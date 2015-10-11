@@ -7,10 +7,10 @@ import (
 )
 
 type Rule struct {
-	Key     string
-	Type    string
-	Setting string
-	Value   string
+	Key     string `json:"key"`
+	Type    string `json:"type"`
+	Setting string `json:"setting"`
+	Value   string `json:"value"`
 }
 
 func (r *Rule) Met(s *Stat) bool {

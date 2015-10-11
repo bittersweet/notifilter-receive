@@ -85,7 +85,6 @@ func incomingItems() chan<- []byte {
 				err := json.Unmarshal(b, &Event)
 				if err != nil {
 					log.Println(err)
-					log.Printf("%+v\n", Event)
 				}
 				tasks <- Event
 			}

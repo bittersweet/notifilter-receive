@@ -36,7 +36,6 @@ func Persist(name string, data map[string]interface{}) error {
 		return err
 	}
 	log.Println("[ES] Success")
-	log.Println("[ES]", string(body))
 	return nil
 }
 

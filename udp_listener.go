@@ -181,6 +181,7 @@ func main() {
 	http.HandleFunc("/new", handleNew)
 	http.HandleFunc("/create", handleCreate)
 	http.HandleFunc("/v1/count", handleCount)
+	http.HandleFunc("/static/", staticHandler)
 
 	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")
 	if err != nil {

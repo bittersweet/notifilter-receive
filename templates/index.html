@@ -1,48 +1,59 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Notifier</title>
+    <link href="/static/primer.css" media="all" rel="stylesheet" />
 
     <style>
-      table {
-        padding: 20px 0 20px 0;
-      }
     </style>
   </head>
   <body>
-    <a href="/new">Create new notifier</a>
-    <table>
-      <tr>
-        <th>id</th>
-        <th>type</th>
-        <th>class</th>
-        <th>template</th>
-      </tr>
-      {{range $notifier := .notifiers}}</td>
-        <tr>
-          <td>{{$notifier.Id}}</td>
-          <td>{{$notifier.NotificationType}}</td>
-          <td>{{$notifier.Class}}</td>
-          <td>{{$notifier.Template}}</td>
-        </tr>
-      {{ end }}
-    </table>
+    <div class="container">
+      <div class="columns">
 
-    Latest incoming items:
-    <table>
-      <tr>
-        <th>id</th>
-        <th>class</th>
-        <th>received at</th>
-        <th>data</th>
-      </tr>
-      {{range $item := .incoming}}</td>
-        <tr>
-          <td>{{$item.Id}}</td>
-          <td>{{$item.Class}}</td>
-          <td>{{$item.ReceivedAt}}</td>
-          <td>{{$item.FormattedData}}</td>
-        </tr>
-      {{ end }}
-    </table>
-  </body>
+        <div class="one-fifth column">
+          <nav class="menu">
+          <a class="menu-item selected" href="/">Index</a>
+          <a class="menu-item" href="/new">New notifier</a>
+          </nav>
+        </div>
+
+        <div class="four-fifths column">
+          <h2>Notifications</h2>
+          <table>
+            <tr>
+              <th>id</th>
+              <th>type</th>
+              <th>class</th>
+              <th>template</th>
+            </tr>
+            {{range $notifier := .notifiers}}</td>
+          <tr>
+            <td>{{$notifier.Id}}</td>
+            <td>{{$notifier.NotificationType}}</td>
+            <td>{{$notifier.Class}}</td>
+            <td>{{$notifier.Template}}</td>
+          </tr>
+          {{ end }}
+        </table>
+
+        <h2>Latest incoming items</h2>
+        <table>
+          <tr>
+            <th>id</th>
+            <th>class</th>
+            <th>received at</th>
+          </tr>
+          {{range $item := .incoming}}
+          <tr>
+            <td>{{$item.Id}}</td>
+            <td>{{$item.Class}}</td>
+            <td>{{$item.ReceivedAt}}</td>
+          </tr>
+          {{ end }}
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
 </html>

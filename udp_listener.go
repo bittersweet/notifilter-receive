@@ -1,16 +1,15 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"runtime"
 	"time"
 
+	"github.com/bittersweet/notifilter/elasticsearch"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	_ "github.com/lib/pq"
@@ -20,22 +19,18 @@ const maxPacketSize = 1024 * 1024
 
 var db *sqlx.DB
 
+// Struct that will keep incoming data
 type Event struct {
-	Key   string         `json:"key"`
-	Value types.JsonText `json:"value"`
+	Identifier string         `json:"identifier"`
+	Data       types.JsonText `json:"data"`
 }
 
+// Data received and persisted to the DB
 type Incoming struct {
 	Id         int       `db:"id"`
 	Class      string    `db:"class"`
 	ReceivedAt time.Time `db:"received_at"`
 	Data       string    `db:"data"`
-}
-
-type ESPayload struct {
-	Key        string                 `json:"key"`
-	ReceivedAt time.Time              `json:"received_at"`
-	Data       map[string]interface{} `json:"data"`
 }
 
 func (i *Incoming) FormattedData() string {
@@ -54,47 +49,31 @@ func (i *Incoming) toMap() map[string]interface{} {
 
 func (e *Event) toMap() map[string]interface{} {
 	m := map[string]interface{}{}
-	e.Value.Unmarshal(&m)
+	e.Data.Unmarshal(&m)
 	return m
 }
 
 func (e *Event) persist() {
 	var incomingID int
 	query := `INSERT INTO incoming(received_at, class, data) VALUES($1, $2, $3) RETURNING id`
-	err := db.QueryRow(query, time.Now(), e.Key, e.Value).Scan(&incomingID)
+	err := db.QueryRow(query, time.Now(), e.Identifier, e.Data).Scan(&incomingID)
 	if err != nil {
 		log.Fatal("persist()", err)
 	}
-	fmt.Printf("class: %s id: %d\n", e.Key, incomingID)
+
+	elasticsearch.Persist(e.Identifier, e.toMap())
+
+	fmt.Printf("class: %s id: %d\n", e.Identifier, incomingID)
 }
 
 func (e *Event) notify() {
 	notifiers := []Notifier{}
-	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", e.Key)
+	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", e.Identifier)
 	if err != nil {
 		log.Fatal("db.Select ", err)
 	}
 	fmt.Printf("Incoming data: %v\n", e.toMap())
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
-
-	go func() {
-		payload := ESPayload{
-			Key:        e.Key,
-			ReceivedAt: time.Now(),
-			Data:       e.toMap(),
-		}
-		body, _ := json.Marshal(payload)
-		resp, err := http.Post("http://localhost:9200/notifilter/event/?pretty", "application/json", bytes.NewReader(body))
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer resp.Body.Close()
-		body, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Print(string(body))
-	}()
 
 	for i := 0; i < len(notifiers); i++ {
 		notifier := notifiers[i]

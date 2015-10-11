@@ -15,7 +15,7 @@ type Rule struct {
 
 func (r *Rule) Met(e *Event) bool {
 	var parsed map[string]interface{}
-	err := json.Unmarshal([]byte(e.Value), &parsed)
+	err := json.Unmarshal([]byte(e.Data), &parsed)
 	if err != nil {
 		log.Fatal("json.Unmarshal", err)
 	}

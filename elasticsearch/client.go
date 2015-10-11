@@ -1,3 +1,4 @@
+// Package elasticsearch provides basic commands to interact with Elasticsearch
 package elasticsearch
 
 import (
@@ -16,6 +17,7 @@ type ESPayload struct {
 	Data       map[string]interface{} `json:"data"`
 }
 
+// Persist saves incoming events to Elasticsearch
 func Persist(key string, data map[string]interface{}) error {
 	fmt.Printf("[ES] Persisting to %s: %v\n", key, data)
 
@@ -39,6 +41,7 @@ func Persist(key string, data map[string]interface{}) error {
 	return nil
 }
 
+// EventCount returns the total amount of events persisted to Elasticsearch
 func EventCount() (int, error) {
 	type response struct {
 		Hits struct {

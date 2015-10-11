@@ -24,20 +24,23 @@ type Event struct {
 	Data       types.JsonText `json:"data"`
 }
 
+// toMap transforms the raw JSON data into a map
 func (e *Event) toMap() map[string]interface{} {
 	m := map[string]interface{}{}
 	e.Data.Unmarshal(&m)
 	return m
 }
 
+// persist saves the incoming event to Elasticsearch
 func (e *Event) persist() {
 	err := elasticsearch.Persist(e.Identifier, e.toMap())
 	if err != nil {
 		log.Fatal("Error persisting to ElasticSearch:", err)
 	}
-
 }
 
+// notify checks to see if we have notifiers set up for this event and if the
+// rules for those notifications have been satisfied
 func (e *Event) notify() {
 	notifiers := []Notifier{}
 	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", e.Identifier)
@@ -53,6 +56,8 @@ func (e *Event) notify() {
 	}
 }
 
+// incomingItems creates a channel that we can place events on so the main loop
+// can keep listening to incoming events
 func incomingItems() chan<- []byte {
 	incomingChan := make(chan []byte)
 
@@ -76,6 +81,7 @@ func incomingItems() chan<- []byte {
 	return incomingChan
 }
 
+// listenToUDP opens a UDP connection that we will listen on
 func listenToUDP(conn *net.UDPConn) {
 	incomingChan := incomingItems()
 
@@ -93,6 +99,8 @@ func listenToUDP(conn *net.UDPConn) {
 	}
 }
 
+// main handles setting up connections for UDP/TCP and connecting to Postgres
+// Note, sqlx uses a connection pool internally.
 func main() {
 	runtime.GOMAXPROCS(4)
 
@@ -104,15 +112,15 @@ func main() {
 	if err != nil {
 		log.Fatal("ListenUDP", err)
 	}
-
 	go listenToUDP(conn)
-	http.HandleFunc("/v1/count", handleCount)
 
 	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")
 	if err != nil {
 		log.Fatal("DB Open()", err)
 	}
 	defer db.Close()
+
+	http.HandleFunc("/v1/count", handleCount)
 
 	fmt.Println("Will start listening on port 8000")
 	http.ListenAndServe(":8000", nil)

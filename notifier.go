@@ -5,19 +5,10 @@ import (
 	"log"
 	"text/template"
 
+	"github.com/bittersweet/notifilter/notifiers"
+
 	"github.com/jmoiron/sqlx/types"
 )
-
-type NotifierResponse struct {
-	response *slackResponse
-	error    error
-}
-
-// Every notifier we create needs to adhere to this interface, so we can
-// substitute another one when testing
-type MessageNotifier interface {
-	sendMessage(string, []byte) NotifierResponse
-}
 
 type Notifier struct {
 	Id               int            `db:"id"`
@@ -29,14 +20,14 @@ type Notifier struct {
 	// email address, slack channel, phone number, how to store?
 }
 
-func (n *Notifier) newNotifier() MessageNotifier {
+func (n *Notifier) newNotifier() notifiers.MessageNotifier {
 	switch n.NotificationType {
 	case "email":
-		return &emailNotifier{}
+		return &notifiers.EmailNotifier{}
 	case "slack":
-		return &slackNotifier{}
+		return &notifiers.SlackNotifier{}
 	}
-	return &slackNotifier{}
+	return &notifiers.SlackNotifier{}
 }
 
 func (n *Notifier) getRules() []*Rule {
@@ -80,7 +71,7 @@ func (n *Notifier) renderTemplate(s *Event) []byte {
 	return doc.Bytes()
 }
 
-func (n *Notifier) notify(s *Event, mn MessageNotifier) {
+func (n *Notifier) notify(s *Event, mn notifiers.MessageNotifier) {
 	nt := n.NotificationType
 	log.Printf("Notifying notifier id: %d type: %s\n", n.Id, nt)
 
@@ -89,6 +80,6 @@ func (n *Notifier) notify(s *Event, mn MessageNotifier) {
 	}
 
 	message := n.renderTemplate(s)
-	mn.sendMessage(s.Identifier, message)
+	mn.SendMessage(s.Identifier, message)
 	log.Printf("Notifying notifier id: %d done\n", n.Id)
 }

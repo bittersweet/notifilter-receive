@@ -1,4 +1,4 @@
-package main
+package notifiers
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-type emailNotifier struct {
+type EmailNotifier struct {
 }
 
 const emailTemplate = `From: {{.From}}
@@ -29,7 +29,7 @@ type EmailData struct {
 	Body    string
 }
 
-func (e *emailNotifier) sendMessage(event_name string, data []byte) NotifierResponse {
+func (e *EmailNotifier) SendMessage(event_name string, data []byte) {
 	var err error
 	var doc bytes.Buffer
 
@@ -55,11 +55,5 @@ func (e *emailNotifier) sendMessage(event_name string, data []byte) NotifierResp
 	err = smtp.SendMail("localhost:1025", auth, "test@example.com", []string{"recipient@example.com"}, doc.Bytes())
 	if err != nil {
 		log.Fatal("smtp.SendMail ", err)
-	}
-
-	// drop e-mail job on a rate limited (max workers) queue
-	// already experienced a connection reset by peer locally
-	return NotifierResponse{
-		error: err,
 	}
 }

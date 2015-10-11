@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 
+	"github.com/bittersweet/notifilter/notifiers"
 	"github.com/jmoiron/sqlx/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -13,23 +14,21 @@ type LocalMessageNotifier struct {
 	processed  bool
 }
 
-func (mn *LocalMessageNotifier) sendMessage(event_name string, data []byte) NotifierResponse {
+func (mn *LocalMessageNotifier) SendMessage(event_name string, data []byte) {
 	mn.event_name = event_name
 	mn.message = data
 	mn.processed = true
-
-	return NotifierResponse{}
 }
 
 func TestNewNotifier(t *testing.T) {
 	n := Notifier{}
-	assert.Equal(t, n.newNotifier(), &slackNotifier{})
+	assert.Equal(t, n.newNotifier(), &notifiers.SlackNotifier{})
 
 	n.NotificationType = "email"
-	assert.Equal(t, n.newNotifier(), &emailNotifier{})
+	assert.Equal(t, n.newNotifier(), &notifiers.EmailNotifier{})
 
 	n.NotificationType = "slack"
-	assert.Equal(t, n.newNotifier(), &slackNotifier{})
+	assert.Equal(t, n.newNotifier(), &notifiers.SlackNotifier{})
 }
 
 func TestNotifierCheckRulesSingle(t *testing.T) {

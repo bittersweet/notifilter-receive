@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -22,9 +23,10 @@ type Stat struct {
 }
 
 type dbNotifier struct {
-	Id       int    `db:"id"`
-	Class    string `db:"class"`
-	Template string `db:"template"`
+	Id               int    `db:"id"`
+	NotificationType string `db:"notification_type"`
+	Class            string `db:"class"`
+	Template         string `db:"template"`
 	// type slack/email/direct to phone
 	// email address, slack channel, phone number, how to store?
 }
@@ -48,8 +50,15 @@ func (s *Stat) notify() {
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
 	for i := 0; i < len(notifiers); i++ {
 		notifier := notifiers[i]
-		fmt.Printf("Notifying notifier id: %d\n", notifier.Id)
-		sendEmailNotification(s, &notifier)
+		fmt.Printf("Notifying notifier id: %d type: %s\n", notifier.Id, notifier.NotificationType)
+		// Trim the string otherwise it will have a length of 20
+		// (defined in schema) plus trailing whitespace
+		nt := strings.TrimSpace(notifier.NotificationType)
+		if nt == "email" {
+			sendEmailNotification(s, &notifier)
+		} else if nt == "slack" {
+			sendSlackNotification(s, &notifier)
+		}
 	}
 }
 

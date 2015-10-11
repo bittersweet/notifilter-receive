@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"runtime"
-	"time"
 
 	"github.com/bittersweet/notifilter/elasticsearch"
 	"github.com/jmoiron/sqlx"
@@ -25,28 +24,6 @@ type Event struct {
 	Data       types.JsonText `json:"data"`
 }
 
-// Data received and persisted to the DB
-type Incoming struct {
-	Id         int       `db:"id"`
-	Class      string    `db:"class"`
-	ReceivedAt time.Time `db:"received_at"`
-	Data       string    `db:"data"`
-}
-
-func (i *Incoming) FormattedData() string {
-	return string(i.Data)
-}
-
-func (i *Incoming) toMap() map[string]interface{} {
-	var parsed map[string]interface{}
-	err := json.Unmarshal([]byte(i.Data), &parsed)
-	if err != nil {
-		log.Fatal("json.Unmarshal", err)
-	}
-
-	return parsed
-}
-
 func (e *Event) toMap() map[string]interface{} {
 	m := map[string]interface{}{}
 	e.Data.Unmarshal(&m)
@@ -54,16 +31,11 @@ func (e *Event) toMap() map[string]interface{} {
 }
 
 func (e *Event) persist() {
-	var incomingID int
-	query := `INSERT INTO incoming(received_at, class, data) VALUES($1, $2, $3) RETURNING id`
-	err := db.QueryRow(query, time.Now(), e.Identifier, e.Data).Scan(&incomingID)
+	err := elasticsearch.Persist(e.Identifier, e.toMap())
 	if err != nil {
-		log.Fatal("persist()", err)
+		log.Fatal("Error persisting to ElasticSearch:", err)
 	}
 
-	elasticsearch.Persist(e.Identifier, e.toMap())
-
-	fmt.Printf("class: %s id: %d\n", e.Identifier, incomingID)
 }
 
 func (e *Event) notify() {
@@ -85,13 +57,9 @@ func incomingItems() chan<- []byte {
 	incomingChan := make(chan []byte)
 
 	go func() {
-		var i = 0
 		for {
 			select {
 			case b := <-incomingChan:
-				i = i + 1
-				fmt.Println(i)
-
 				var Event Event
 				err := json.Unmarshal(b, &Event)
 				if err != nil {

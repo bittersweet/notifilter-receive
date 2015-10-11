@@ -9,7 +9,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -56,10 +55,8 @@ func (s *Stat) notify() {
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
 	for i := 0; i < len(notifiers); i++ {
 		notifier := notifiers[i]
-		fmt.Printf("Notifying notifier id: %d type: %s\n", notifier.Id, notifier.NotificationType)
-		// Trim the string otherwise it will have a length of 20
-		// (defined in schema) plus trailing whitespace
-		nt := strings.TrimSpace(notifier.NotificationType)
+		nt := notifier.NotificationType
+		fmt.Printf("Notifying notifier id: %d type: %s\n", notifier.Id, nt)
 		if nt == "email" {
 			sendEmailNotification(s, &notifier)
 		} else if nt == "slack" {

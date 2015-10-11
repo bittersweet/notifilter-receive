@@ -15,7 +15,6 @@ func trackTime(start time.Time, name string) {
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
 	defer trackTime(time.Now(), "handleIndex")
-	defer r.Body.Close()
 
 	t, err := template.ParseFiles("templates/index.html")
 	if err != nil {
@@ -46,7 +45,6 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 
 func handleCount(w http.ResponseWriter, r *http.Request) {
 	defer trackTime(time.Now(), "handleCount")
-	defer r.Body.Close()
 
 	count := countRows()
 	jmap := map[string]int{

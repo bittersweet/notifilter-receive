@@ -3,13 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	"github.com/jmoiron/sqlx/types"
-	_ "github.com/lib/pq"
 	"log"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/jmoiron/sqlx/types"
+	_ "github.com/lib/pq"
 )
 
 const maxPacketSize = 1024 * 1024

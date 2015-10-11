@@ -58,7 +58,7 @@ $(document).ready(function() {
 
         $.post("/preview", payload, function(data) {
             console.log("output: ", data);
-            $("#templatePreview").text(data);
+            $("#templatePreview").val(data);
         }, "text");
     });
 });

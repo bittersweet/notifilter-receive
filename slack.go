@@ -10,7 +10,7 @@ import (
 	"text/template"
 )
 
-func sendSlackNotification(s *Stat, notifier *dbNotifier) {
+func sendSlackNotification(s *Stat, notifier *Notifier) {
 	var err error
 	var doc bytes.Buffer
 

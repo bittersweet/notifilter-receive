@@ -21,13 +21,24 @@ type Stat struct {
 	Value types.JsonText `json:"value"`
 }
 
-type dbNotifier struct {
+type Notifier struct {
 	Id               int    `db:"id"`
 	NotificationType string `db:"notification_type"`
 	Class            string `db:"class"`
 	Template         string `db:"template"`
 	// type slack/email/direct to phone
 	// email address, slack channel, phone number, how to store?
+}
+
+type Incoming struct {
+	Id         int       `db:"id"`
+	Class      string    `db:"class"`
+	ReceivedAt time.Time `db:"received_at"`
+	Data       string    `db:"data"`
+}
+
+func (i *Incoming) FormattedData() string {
+	return string(i.Data)
 }
 
 func (s *Stat) toMap() map[string]interface{} {
@@ -47,7 +58,7 @@ func (s *Stat) persist() {
 }
 
 func (s *Stat) notify() {
-	notifiers := []dbNotifier{}
+	notifiers := []Notifier{}
 	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", s.Key)
 	if err != nil {
 		log.Fatal("db.Select ", err)
@@ -110,7 +121,7 @@ func main() {
 	}
 
 	go listenToUDP(conn)
-	// http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/v1/count", handleCount)
 
 	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")

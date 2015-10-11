@@ -1,0 +1,41 @@
+<html>
+  <head>
+  </head>
+  <body>
+    Notifiers:
+    <table>
+      <tr>
+        <th>id</th>
+        <th>type</th>
+        <th>class</th>
+        <th>template</th>
+      </tr>
+      {{range $notifier := .notifiers}}</td>
+        <tr>
+          <td>{{$notifier.Id}}</td>
+          <td>{{$notifier.NotificationType}}</td>
+          <td>{{$notifier.Class}}</td>
+          <td style="background: red;">{{$notifier.Template}}</td>
+        </tr>
+      {{ end }}
+    </table>
+
+    Latest incoming items:
+    <table>
+      <tr>
+        <th>id</th>
+        <th>class</th>
+        <th>received at</th>
+        <th>data</th>
+      </tr>
+      {{range $item := .incoming}}</td>
+        <tr>
+          <td>{{$item.Id}}</td>
+          <td>{{$item.Class}}</td>
+          <td>{{$item.ReceivedAt}}</td>
+          <td>{{$item.FormattedData}}</td>
+        </tr>
+      {{ end }}
+    </table>
+  </body>
+</html>

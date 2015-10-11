@@ -57,7 +57,7 @@ func sendEmail(class string, data []byte) {
 	// already experienced a connection reset by peer locally
 }
 
-func sendEmailNotification(s *Stat, notifier *dbNotifier) {
+func sendEmailNotification(s *Stat, notifier *Notifier) {
 	var err error
 	var doc bytes.Buffer
 

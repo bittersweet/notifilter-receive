@@ -47,7 +47,6 @@ func (e *Event) notify() {
 	if err != nil {
 		log.Fatal("db.Select ", err)
 	}
-	fmt.Printf("Incoming data: %v\n", e.toMap())
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
 
 	for i := 0; i < len(notifiers); i++ {

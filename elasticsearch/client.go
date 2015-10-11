@@ -4,7 +4,6 @@ package elasticsearch
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,7 +18,7 @@ type ESPayload struct {
 
 // Persist saves incoming events to Elasticsearch
 func Persist(key string, data map[string]interface{}) error {
-	fmt.Printf("[ES] Persisting to %s: %v\n", key, data)
+	log.Printf("[ES] Persisting to %s: %v\n", key, data)
 
 	payload := ESPayload{
 		Key:        key,
@@ -57,7 +56,7 @@ func EventCount() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println("[ES] response: ", string(body))
+	log.Println("[ES] response: ", string(body))
 
 	var parsed response
 	err = json.Unmarshal(body, &parsed)
@@ -65,6 +64,5 @@ func EventCount() (int, error) {
 		return 0, err
 	}
 
-	fmt.Println(parsed)
 	return parsed.Hits.Total, nil
 }

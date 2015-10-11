@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"text/template"
 
@@ -49,12 +48,12 @@ func (n *Notifier) checkRules(e *Event) bool {
 	rules_met := true
 	for _, rule := range rules {
 		if !rule.Met(e) {
-			fmt.Printf("Rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v\n", rule.Key, rule.Type, rule.Setting, rule.Value, e.toMap()[rule.Key])
+			log.Printf("Rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v\n", rule.Key, rule.Type, rule.Setting, rule.Value, e.toMap()[rule.Key])
 			rules_met = false
 		}
 	}
 	if !rules_met {
-		fmt.Printf("Stopping notification of id: %d, rules not met\n", n.Id)
+		log.Printf("Stopping notification of id: %d, rules not met\n", n.Id)
 		return false
 	}
 
@@ -81,7 +80,7 @@ func (n *Notifier) renderTemplate(s *Event) []byte {
 
 func (n *Notifier) notify(s *Event, mn MessageNotifier) {
 	nt := n.NotificationType
-	fmt.Printf("Notifying notifier id: %d type: %s\n", n.Id, nt)
+	log.Printf("Notifying notifier id: %d type: %s\n", n.Id, nt)
 
 	if !n.checkRules(s) {
 		return
@@ -89,5 +88,5 @@ func (n *Notifier) notify(s *Event, mn MessageNotifier) {
 
 	message := n.renderTemplate(s)
 	mn.sendMessage(s.Identifier, message)
-	fmt.Printf("Notifying notifier id: %d done\n", n.Id)
+	log.Printf("Notifying notifier id: %d done\n", n.Id)
 }

@@ -56,3 +56,24 @@ func sendEmail(class string, data []byte) {
 	// drop e-mail job on a rate limited (max workers) queue
 	// already experienced a connection reset by peer locally
 }
+
+func sendEmailNotification(s *Stat, notifier *dbNotifier) {
+	var err error
+	var doc bytes.Buffer
+
+	t := template.New("notificationTemplate")
+	t, err = t.Parse(notifier.Template)
+	if err != nil {
+		log.Fatal("t.Parse of n.Template", err)
+	}
+
+	m := map[string]interface{}{}
+	s.Value.Unmarshal(&m)
+
+	err = t.Execute(&doc, m)
+	if err != nil {
+		log.Fatal("t.Execute ", err)
+	}
+
+	sendEmail(s.Key, doc.Bytes())
+}

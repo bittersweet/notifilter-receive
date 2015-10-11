@@ -1,8 +1,6 @@
 package main
 
 import (
-	// "database/sql"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/jmoiron/sqlx"
@@ -11,7 +9,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"text/template"
 	"time"
 )
 
@@ -50,30 +47,13 @@ func (s *Stat) notify() {
 	}
 	fmt.Printf("Found %d notifiers\n", len(notifiers))
 	for i := 0; i < len(notifiers); i++ {
-		s.specialNotify(&notifiers[i])
+		notifier := notifiers[i]
+		fmt.Printf("Notifying notifier id: %d\n", notifier.Id)
+		sendEmailNotification(s, &notifier)
 	}
 }
 
 func (s *Stat) specialNotify(notifier *dbNotifier) {
-	fmt.Printf("Notifying notifier id: %d\n", notifier.Id)
-	var err error
-	var doc bytes.Buffer
-
-	t := template.New("notificationTemplate")
-	t, err = t.Parse(notifier.Template)
-	if err != nil {
-		log.Fatal("t.Parse of n.Template", err)
-	}
-
-	m := map[string]interface{}{}
-	s.Value.Unmarshal(&m)
-
-	err = t.Execute(&doc, m)
-	if err != nil {
-		log.Fatal("t.Execute ", err)
-	}
-
-	sendEmail(s.Key, doc.Bytes())
 }
 
 func countRows() int {

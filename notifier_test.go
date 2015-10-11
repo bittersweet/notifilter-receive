@@ -15,9 +15,9 @@ type LocalMessageNotifier struct {
 	Processed bool
 }
 
-func (mn *LocalMessageNotifier) SendMessage(eventName string, target string, data []byte) {
-	mn.EventName = eventName
+func (mn *LocalMessageNotifier) SendMessage(target string, eventName string, data []byte) {
 	mn.Target = target
+	mn.EventName = eventName
 	mn.Message = data
 	mn.Processed = true
 }

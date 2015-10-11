@@ -27,15 +27,11 @@ func (n *Notifier) newNotifier() notifiers.MessageNotifier {
 		return &notifiers.EmailNotifier{}
 	case "slack":
 		return &notifiers.SlackNotifier{
-			Token:    C.SlackToken,
-			Username: C.SlackUsername,
-			Icon:     C.SlackIcon,
+			HookURL: C.SlackHookURL,
 		}
 	}
 	return &notifiers.SlackNotifier{
-		Token:    C.SlackToken,
-		Username: C.SlackUsername,
-		Icon:     C.SlackIcon,
+		HookURL: C.SlackHookURL,
 	}
 }
 
@@ -89,6 +85,6 @@ func (n *Notifier) notify(e *Event, mn notifiers.MessageNotifier) {
 	}
 
 	message, _ := n.renderTemplate(e)
-	mn.SendMessage(e.Identifier, n.Target, message)
+	mn.SendMessage(n.Target, n.EventName, message)
 	e.log("[NOTIFY] Notifying notifier id: %d done", n.ID)
 }

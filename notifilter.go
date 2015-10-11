@@ -22,16 +22,14 @@ const maxPacketSize = 1024 * 1024
 var db *sqlx.DB
 
 type Config struct {
-	AppPort       int    `default:"8000"`
-	DBHost        string `default:"127.0.0.1"`
-	DBUser        string `default:"markmulder"`
-	DBPassword    string `default:""`
-	DBName        string `default:"notifilter_development"`
-	ESHost        string `default:"127.0.0.1"`
-	ESPort        int    `default:"9200"`
-	SlackToken    string `required:"true"`
-	SlackUsername string `default:"Notifilter"`
-	SlackIcon     string `default:"http://lorempixel.com/48/48/"`
+	AppPort      int    `default:"8000"`
+	DBHost       string `default:"127.0.0.1"`
+	DBUser       string `default:"markmulder"`
+	DBPassword   string `default:""`
+	DBName       string `default:"notifilter_development"`
+	ESHost       string `default:"127.0.0.1"`
+	ESPort       int    `default:"9200"`
+	SlackHookURL string `required:"true"`
 }
 
 // C holds main application config loaded from ENV variables

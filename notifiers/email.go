@@ -31,7 +31,7 @@ type emailData struct {
 }
 
 // SendMessage sends an event with processed data to a selected email address (target)
-func (e *EmailNotifier) SendMessage(eventName string, target string, data []byte) {
+func (e *EmailNotifier) SendMessage(target string, eventName string, data []byte) {
 	var err error
 	var doc bytes.Buffer
 

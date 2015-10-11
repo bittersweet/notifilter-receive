@@ -102,24 +102,6 @@ func listenToUDP(conn *net.UDPConn) {
 	}
 }
 
-func handleCount(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
-	count := countRows()
-	jmap := map[string]int{
-		"status": 200,
-		"count":  count,
-	}
-
-	output, err := json.MarshalIndent(jmap, "", "  ")
-	if err != nil {
-		log.Fatal("MarshalIndent", err)
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Write(output)
-}
-
 func main() {
 	addr, err := net.ResolveUDPAddr("udp", ":8000")
 	if err != nil {
@@ -131,7 +113,8 @@ func main() {
 	}
 
 	go listenToUDP(conn)
-	http.HandleFunc("/", handleCount)
+	// http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/v1/count", handleCount)
 
 	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")
 	if err != nil {

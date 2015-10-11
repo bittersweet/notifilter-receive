@@ -76,13 +76,13 @@ func (e *Event) toMap() map[string]interface{} {
 }
 
 func (e *Event) persist() {
-	var incomingId int
+	var incomingID int
 	query := `INSERT INTO incoming(received_at, class, data) VALUES($1, $2, $3) RETURNING id`
-	err := db.QueryRow(query, time.Now(), e.Key, e.Value).Scan(&incomingId)
+	err := db.QueryRow(query, time.Now(), e.Key, e.Value).Scan(&incomingID)
 	if err != nil {
 		log.Fatal("persist()", err)
 	}
-	fmt.Printf("class: %s id: %d\n", e.Key, incomingId)
+	fmt.Printf("class: %s id: %d\n", e.Key, incomingID)
 }
 
 func (e *Event) notify() {

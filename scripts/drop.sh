@@ -1,2 +1,1 @@
-psql notifier -c "drop table incoming";
-psql notifier -c "drop table notifiers";
+psql notifilter_development -c "drop table notifiers";

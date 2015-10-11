@@ -12,12 +12,11 @@ import (
 
 type Notifier struct {
 	Id               int            `db:"id"`
-	NotificationType string         `db:"notification_type"`
 	EventName        string         `db:"event_name"`
 	Template         string         `db:"template"`
 	Rules            types.JsonText `db:"rules"`
-	// type slack/email/direct to phone
-	// email address, slack channel, phone number, how to store?
+	NotificationType string         `db:"notification_type"`
+	Target           string         `db:"target"`
 }
 
 func (n *Notifier) newNotifier() notifiers.MessageNotifier {
@@ -53,7 +52,7 @@ func (n *Notifier) checkRules(e *Event) bool {
 	return true
 }
 
-func (n *Notifier) renderTemplate(s *Event) []byte {
+func (n *Notifier) renderTemplate(e *Event) []byte {
 	var err error
 	var doc bytes.Buffer
 
@@ -63,7 +62,7 @@ func (n *Notifier) renderTemplate(s *Event) []byte {
 		log.Fatal("t.Parse of n.Template", err)
 	}
 
-	err = t.Execute(&doc, s.toMap())
+	err = t.Execute(&doc, e.toMap())
 	if err != nil {
 		log.Fatal("t.Execute ", err)
 	}
@@ -71,15 +70,15 @@ func (n *Notifier) renderTemplate(s *Event) []byte {
 	return doc.Bytes()
 }
 
-func (n *Notifier) notify(s *Event, mn notifiers.MessageNotifier) {
+func (n *Notifier) notify(e *Event, mn notifiers.MessageNotifier) {
 	nt := n.NotificationType
 	log.Printf("Notifying notifier id: %d type: %s\n", n.Id, nt)
 
-	if !n.checkRules(s) {
+	if !n.checkRules(e) {
 		return
 	}
 
-	message := n.renderTemplate(s)
-	mn.SendMessage(s.Identifier, message)
+	message := n.renderTemplate(e)
+	mn.SendMessage(e.Identifier, n.Target, message)
 	log.Printf("Notifying notifier id: %d done\n", n.Id)
 }

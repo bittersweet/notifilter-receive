@@ -29,7 +29,7 @@ type EmailData struct {
 	Body    string
 }
 
-func (e *EmailNotifier) SendMessage(event_name string, data []byte) {
+func (e *EmailNotifier) SendMessage(event_name string, target string, data []byte) {
 	var err error
 	var doc bytes.Buffer
 
@@ -39,10 +39,10 @@ func (e *EmailNotifier) SendMessage(event_name string, data []byte) {
 		log.Fatal("t.Parse ", err)
 	}
 	context := &EmailData{
-		"Springest Dev <developers@springest.nl>",
-		"recipient@example.com",
-		"Email subject line",
-		string(data),
+		From:    "Springest Dev <developers@springest.nl>",
+		To:      target,
+		Subject: "Email subject line",
+		Body:    string(data),
 	}
 	err = t.Execute(&doc, context)
 	if err != nil {

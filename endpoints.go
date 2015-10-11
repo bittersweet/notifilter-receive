@@ -53,12 +53,22 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 func handleNew(w http.ResponseWriter, r *http.Request) {
 	defer trackTime(time.Now(), "handleNew")
 
+	classes := []string{}
+	err := db.Select(&classes, "SELECT distinct(class) FROM incoming")
+	if err != nil {
+		log.Fatal("db.Select incoming ", err)
+	}
+
 	t, err := template.ParseFiles("templates/new.html")
 	if err != nil {
 		log.Fatal("ParseFiles", err)
 	}
 
-	err = t.Execute(w, nil)
+	data := map[string]interface{}{
+		"classes": classes,
+	}
+
+	err = t.Execute(w, data)
 	if err != nil {
 		log.Fatal("t.Execute", err)
 	}

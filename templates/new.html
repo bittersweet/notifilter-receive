@@ -30,8 +30,9 @@
       </select>
       <br><br>
       <select name="class">
-        <option value="User">User</option>
-        <option value="Review">Review</option>
+        {{ range $class := .classes }}
+        <option value="{{$class}}">{{$class}}</option>
+        {{ end }}
       </select>
       <br><br>
       <textarea rows="4" cols="50" name="template" id="template"></textarea>

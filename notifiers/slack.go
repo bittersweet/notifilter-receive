@@ -41,8 +41,11 @@ func (s *SlackNotifier) SendMessage(eventName string, target string, data []byte
 		Ok bool   `json:"ok"`
 		Ts string `json:"ts"`
 	}{}
-	err = json.Unmarshal(contents, slackResponse)
+	err = json.Unmarshal(contents, &slackResponse)
 	if err != nil {
 		log.Println("json.Unmarshal", err)
 	}
+	// TODO: Do something with slack response again, ok key or status code will
+	// tell us if everything was alright
+	fmt.Println("Slack response:", slackResponse)
 }

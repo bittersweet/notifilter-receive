@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/jmoiron/sqlx/types"
@@ -64,10 +65,17 @@ func handleNew(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("ParseFiles", err)
 	}
 
+	list := keys.List()
+	alphabeticalList := make([]string, len(list))
+	for i, k := range list {
+		alphabeticalList[i] = k.(string)
+	}
+	sort.Strings(alphabeticalList)
+
 	data := map[string]interface{}{
 		"classes":      classes,
 		"classesCount": len(classes),
-		"keys":         keys.List(),
+		"keys":         alphabeticalList,
 	}
 
 	err = t.Execute(w, data)

@@ -1,16 +1,25 @@
 package main
 
 import (
+	"encoding/json"
+	"github.com/hoisie/redis"
 	"log"
 	"net"
-	"encoding/json"
 )
 
 const maxPacketSize = 1024 * 1024
 
 type Stat struct {
-  Key   string `json:"key"`
-  Value string `json:"value"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+func trackStat(stat Stat) {
+	var client redis.Client
+	var key = stat.Key
+	client.Set(key, []byte(stat.Value))
+	val, _ := client.Get(stat.Key)
+	log.Println(key, string(val))
 }
 
 func main() {
@@ -25,24 +34,22 @@ func main() {
 
 	buffer := make([]byte, maxPacketSize)
 	for {
-		n, err := conn.Read(buffer)
+		bytes, err := conn.Read(buffer)
 		if err != nil {
 			log.Println("UDP read error: ", err.Error())
 			continue
 		}
 
-		msg := make([]byte, n)
+		msg := make([]byte, bytes)
 		copy(msg, buffer)
 
-		log.Println(string(msg))
-
 		var stat Stat
-    err = json.Unmarshal(msg, &stat)
-    if err == nil {
-      log.Printf("%+v\n", stat)
-    } else {
-      log.Println(err)
-      log.Printf("%+v\n", stat)
-    }
+		err = json.Unmarshal(msg, &stat)
+		if err != nil {
+			log.Println(err)
+			log.Printf("%+v\n", stat)
+		}
+
+		trackStat(stat)
 	}
 }

@@ -19,7 +19,9 @@ func handleCount(w http.ResponseWriter, r *http.Request) {
 
 	count, err := elasticsearch.EventCount()
 	if err != nil {
-		log.Fatal("Error while getting count from ES", err)
+		log.Println("Error while getting count from ES", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	jmap := map[string]int{
@@ -29,7 +31,8 @@ func handleCount(w http.ResponseWriter, r *http.Request) {
 
 	output, err := json.MarshalIndent(jmap, "", "  ")
 	if err != nil {
-		log.Fatal("MarshalIndent", err)
+		log.Println("Error in /v1/count MarshalIndent", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
+var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 
 func TestRuleKeyDoesNotMatch(t *testing.T) {
 	s := Stat{"Mark", jt}

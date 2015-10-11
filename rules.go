@@ -59,8 +59,7 @@ func metString(r *Rule, parsed map[string]interface{}) bool {
 }
 
 func metNumber(r *Rule, parsed map[string]interface{}) bool {
-	unparsedVal := parsed[r.Key].(string)
-	val, _ := strconv.ParseFloat(unparsedVal, 64)
+	val := parsed[r.Key].(float64)
 	needed_val, _ := strconv.ParseFloat(r.Value, 64)
 
 	switch r.Setting {

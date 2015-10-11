@@ -42,7 +42,7 @@ func TestNotifierCheckRulesSingle(t *testing.T) {
 		Rules:            rules,
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	s := Stat{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)
@@ -59,7 +59,7 @@ func TestNotifierCheckRulesMultiple(t *testing.T) {
 		Rules:            rules,
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	s := Stat{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)
@@ -91,7 +91,7 @@ func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 		Rules:            rules,
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	s := Stat{"Mark", jt}
 
 	assert.Equal(t, n.checkRules(&s), true)
@@ -105,7 +105,7 @@ func TestNotifierNotify(t *testing.T) {
 		Template:         "name: {{.name}}",
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	s := Stat{"Mark", jt}
 
 	mn := &LocalMessageNotifier{}
@@ -126,7 +126,7 @@ func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
 		Rules:            rules,
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "0"}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 0}`)
 	s := Stat{"Mark", jt}
 
 	mn := &LocalMessageNotifier{}
@@ -143,7 +143,7 @@ func TestNotifierRenderTemplate(t *testing.T) {
 		Template:         "name: {{.name}}",
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	s := Stat{"Mark", jt}
 
 	result := n.renderTemplate(&s)
@@ -154,20 +154,17 @@ func TestNotifierRenderTemplate(t *testing.T) {
 func TestNotifierRenderTemplateWithLogic(t *testing.T) {
 	template := `{{ if .active }}Active!{{ else }}inactive{{ end }}`
 	n := Notifier{
-		Id:               1,
-		NotificationType: "email",
-		Class:            "User",
-		Template:         template,
+		Template: template,
 	}
 
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	s := Stat{"Mark", jt}
 
 	result := n.renderTemplate(&s)
 	expected := "Active!"
 	assert.Equal(t, result, expected)
 
-	jt = types.JsonText(`{"active": false, "name": "Go", "number": "12"}`)
+	jt = types.JsonText(`{"active": false, "name": "Go", "number": 12}`)
 	s = Stat{"Mark", jt}
 
 	result = n.renderTemplate(&s)

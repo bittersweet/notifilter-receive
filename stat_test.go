@@ -21,7 +21,7 @@ func TestStatPersist(t *testing.T) {
 }
 
 func TestStatKeys(t *testing.T) {
-	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 
 	s := Stat{"Mark", jt}
 	result := s.keys()

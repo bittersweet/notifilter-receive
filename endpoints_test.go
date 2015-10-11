@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
@@ -69,4 +70,29 @@ func TestCreateNotifier(t *testing.T) {
 	assert.Equal(t, "User", notifier.Class)
 	assert.Equal(t, "test", notifier.Template)
 	assert.Equal(t, "{}", notifier.Rules)
+}
+
+func TestPreview(t *testing.T) {
+	var incomingId int
+	query := `INSERT INTO incoming(received_at, class, data) VALUES($1, $2, $3) RETURNING id`
+	data := `{"name": "Mark", "number": 100}`
+	err := db.QueryRow(query, time.Now(), "Booking", data).Scan(&incomingId)
+	if err != nil {
+		t.Fatal("Insert in TestPreview", err)
+	}
+
+	params := url.Values{"class": {"Booking"}, "template": {"{{.name}} is pretty cool, the number of the day is: {{.number}}"}}
+	request, _ := http.NewRequest("POST", "/preview", strings.NewReader(params.Encode()))
+	request.Header.Set(
+		"Content-Type",
+		"application/x-www-form-urlencoded; param=value",
+	)
+	response := httptest.NewRecorder()
+	handlePreview(response, request)
+
+	assert.Equal(t, 200, response.Code)
+
+	result := string(response.Body.Bytes())
+	expected := "Mark is pretty cool, the number of the day is: 100"
+	assert.Equal(t, string(result), expected)
 }

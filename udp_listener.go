@@ -50,6 +50,16 @@ func (i *Incoming) keys() []string {
 	return keys
 }
 
+func (i *Incoming) toMap() map[string]interface{} {
+	var parsed map[string]interface{}
+	err := json.Unmarshal([]byte(i.Data), &parsed)
+	if err != nil {
+		log.Fatal("json.Unmarshal", err)
+	}
+
+	return parsed
+}
+
 func (s *Stat) toMap() map[string]interface{} {
 	m := map[string]interface{}{}
 	s.Value.Unmarshal(&m)
@@ -180,6 +190,7 @@ func main() {
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/new", handleNew)
 	http.HandleFunc("/create", handleCreate)
+	http.HandleFunc("/preview", handlePreview)
 	http.HandleFunc("/v1/count", handleCount)
 	http.HandleFunc("/static/", staticHandler)
 

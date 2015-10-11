@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -132,6 +133,38 @@ func handleCount(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(output)
+}
+
+func handlePreview(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	defer trackTime(time.Now(), "handlePreview")
+
+	var err error
+	var doc bytes.Buffer
+
+	err = r.ParseForm()
+	if err != nil {
+		log.Fatal("handlePreview", err)
+	}
+
+	class := r.Form.Get("class")
+	incomingTemplate := r.Form.Get("template")
+	incoming := Incoming{}
+	err = db.Get(&incoming, "SELECT * FROM incoming WHERE class=$1 ORDER BY id DESC LIMIT 1", class)
+
+	t := template.New("notificationTemplate")
+	t, err = t.Parse(incomingTemplate)
+	if err != nil {
+		log.Fatal("t.Parse of template", err)
+	}
+
+	err = t.Execute(&doc, incoming.toMap())
+	if err != nil {
+		log.Fatal("t.Execute ", err)
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Write(doc.Bytes())
 }
 
 func staticHandler(w http.ResponseWriter, r *http.Request) {

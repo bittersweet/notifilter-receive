@@ -49,8 +49,9 @@ func TestSendSlack(t *testing.T) {
 	test_server := returnTestResponseForPath("/api/chat.postMessage", resp, t)
 	defer closeTestServer(test_server)
 
-	response, _ := sendSlack("mark", []byte{10, 10})
-	if response.Ok != true {
+	s := slackNotifier{}
+	notifierResponse := s.sendMessage("mark", []byte("Message"))
+	if notifierResponse.response.Ok != true {
 		t.Error("response is not correct")
 	}
 }

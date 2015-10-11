@@ -7,6 +7,31 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type LocalMessageNotifier struct {
+	class     string
+	message   []byte
+	processed bool
+}
+
+func (mn *LocalMessageNotifier) sendMessage(class string, data []byte) NotifierResponse {
+	mn.class = class
+	mn.message = data
+	mn.processed = true
+
+	return NotifierResponse{}
+}
+
+func TestNewNotifier(t *testing.T) {
+	n := Notifier{}
+	assert.Equal(t, n.newNotifier(), &slackNotifier{})
+
+	n.NotificationType = "email"
+	assert.Equal(t, n.newNotifier(), &slackNotifier{})
+
+	n.NotificationType = "slack"
+	assert.Equal(t, n.newNotifier(), &slackNotifier{})
+}
+
 func TestNotifierCheckRulesSingle(t *testing.T) {
 	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "eq", "value": "12"}]`)
 	n := Notifier{
@@ -73,10 +98,41 @@ func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 }
 
 func TestNotifierNotify(t *testing.T) {
-	// fake sendSlackNotification somehow?
+	n := Notifier{
+		Id:               1,
+		NotificationType: "email",
+		Class:            "User",
+		Template:         "name: {{.name}}",
+	}
+
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "12"}`)
+	s := Stat{"Mark", jt}
+
+	mn := &LocalMessageNotifier{}
+	n.notify(&s, mn)
+
+	assert.Equal(t, mn.class, "Mark")
+	assert.Equal(t, mn.message, []byte("name: Go"))
+	assert.Equal(t, mn.processed, true)
 }
 
 func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
+	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "gt", "value": "1"}]`)
+	n := Notifier{
+		Id:               1,
+		NotificationType: "email",
+		Class:            "User",
+		Template:         "name: {{.name}}",
+		Rules:            rules,
+	}
+
+	var jt = types.JsonText(`{"active": true, "name": "Go", "number": "0"}`)
+	s := Stat{"Mark", jt}
+
+	mn := &LocalMessageNotifier{}
+	n.notify(&s, mn)
+
+	assert.Equal(t, mn.processed, false)
 }
 
 func TestNotifierRenderTemplate(t *testing.T) {

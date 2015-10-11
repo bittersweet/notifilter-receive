@@ -9,6 +9,15 @@ import (
 	"github.com/jmoiron/sqlx/types"
 )
 
+type NotifierResponse struct {
+	response *slackResponse
+	error    error
+}
+
+type MessageNotifier interface {
+	sendMessage(string, []byte) NotifierResponse
+}
+
 type Notifier struct {
 	Id               int            `db:"id"`
 	NotificationType string         `db:"notification_type"`
@@ -17,6 +26,16 @@ type Notifier struct {
 	Rules            types.JsonText `db:"rules"`
 	// type slack/email/direct to phone
 	// email address, slack channel, phone number, how to store?
+}
+
+func (n *Notifier) newNotifier() MessageNotifier {
+	switch n.NotificationType {
+	case "email":
+		return &emailNotifier{}
+	case "slack":
+		return &slackNotifier{}
+	}
+	return &slackNotifier{}
 }
 
 func (n *Notifier) getRules() []*Rule {
@@ -60,19 +79,14 @@ func (n *Notifier) renderTemplate(s *Stat) []byte {
 	return doc.Bytes()
 }
 
-func (n *Notifier) notify(s *Stat) {
+func (n *Notifier) notify(s *Stat, mn MessageNotifier) {
 	nt := n.NotificationType
 	fmt.Printf("Notifying notifier id: %d type: %s\n", n.Id, nt)
 
 	if !n.checkRules(s) {
-		// early return
+		return
 	}
 
 	message := n.renderTemplate(s)
-	switch nt {
-	case "email":
-		sendEmail(s.Key, message)
-	case "slack":
-		sendSlack(s.Key, message)
-	}
+	mn.sendMessage(s.Key, message)
 }

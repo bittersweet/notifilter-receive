@@ -77,7 +77,7 @@ func (s *Stat) notify() {
 
 	for i := 0; i < len(notifiers); i++ {
 		notifier := notifiers[i]
-		notifier.notify(s)
+		notifier.notify(s, notifier.newNotifier())
 	}
 }
 

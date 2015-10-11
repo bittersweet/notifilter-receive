@@ -7,6 +7,9 @@ import (
 	"text/template"
 )
 
+type emailNotifier struct {
+}
+
 const emailTemplate = `From: {{.From}}
 To: {{.To}}
 Subject: {{.Subject}}
@@ -26,7 +29,7 @@ type EmailData struct {
 	Body    string
 }
 
-func sendEmail(class string, data []byte) {
+func (e *emailNotifier) sendMessage(class string, data []byte) NotifierResponse {
 	var err error
 	var doc bytes.Buffer
 
@@ -55,22 +58,7 @@ func sendEmail(class string, data []byte) {
 
 	// drop e-mail job on a rate limited (max workers) queue
 	// already experienced a connection reset by peer locally
-}
-
-func sendEmailNotification(s *Stat, notifier *Notifier) {
-	var err error
-	var doc bytes.Buffer
-
-	t := template.New("notificationTemplate")
-	t, err = t.Parse(notifier.Template)
-	if err != nil {
-		log.Fatal("t.Parse of n.Template", err)
+	return NotifierResponse{
+		error: err,
 	}
-
-	err = t.Execute(&doc, s.toMap())
-	if err != nil {
-		log.Fatal("t.Execute ", err)
-	}
-
-	sendEmail(s.Key, doc.Bytes())
 }

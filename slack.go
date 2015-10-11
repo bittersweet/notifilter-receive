@@ -9,12 +9,15 @@ import (
 	"net/url"
 )
 
-var transport http.RoundTripper
+type slackNotifier struct {
+}
 
 type slackResponse struct {
 	Ok bool   `json:"ok"`
 	Ts string `json:"ts"`
 }
+
+var transport http.RoundTripper
 
 func getTransport() http.RoundTripper {
 	// If we have overridden this variable in testing
@@ -29,7 +32,7 @@ func SetTransport(t http.RoundTripper) {
 }
 
 // TODO: Get settings from env variables
-func sendSlack(class string, data []byte) (*slackResponse, error) {
+func (s *slackNotifier) sendMessage(class string, data []byte) NotifierResponse {
 	client := &http.Client{Transport: getTransport()}
 	// https://api.slack.com/methods/chat.postMessage
 	// format := "http://slack.com/api/chat.postMessage?token=%s&channel=%s&text=%s&username=%s&icon_url=%s"
@@ -46,7 +49,7 @@ func sendSlack(class string, data []byte) (*slackResponse, error) {
 	res, err := client.Get(url)
 	if err != nil {
 		log.Println("http.Get", err)
-		return &slackResponse{}, err
+		return NotifierResponse{&slackResponse{}, err}
 	}
 	defer res.Body.Close()
 	contents, err := ioutil.ReadAll(res.Body)
@@ -60,5 +63,5 @@ func sendSlack(class string, data []byte) (*slackResponse, error) {
 		log.Println("json.Unmarshal", err)
 	}
 
-	return slackResponse, err
+	return NotifierResponse{slackResponse, err}
 }

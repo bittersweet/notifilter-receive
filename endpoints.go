@@ -89,10 +89,11 @@ func handleCreate(w http.ResponseWriter, r *http.Request) {
 		})
 
 	if err != nil {
-		log.Fatal("insert named query", err)
+		log.Println("ERROR: insert named query", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		http.Redirect(w, r, "/", http.StatusFound)
 	}
-
-	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func handleCount(w http.ResponseWriter, r *http.Request) {

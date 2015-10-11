@@ -1,11 +1,15 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -16,9 +20,6 @@ func TestIndexStatus(t *testing.T) {
 	url := "/"
 	request, _ := http.NewRequest("GET", url, nil)
 	response := httptest.NewRecorder()
-	// need a resp.Body.Close() if it's a POST , in the handler, and a reader in the setup here:
-	// http://play.golang.org/p/xpChdYyXWH
-	// req, err := http.NewRequest("POST", "/", strings.NewReader("Hello"))
 
 	handleIndex(response, request)
 
@@ -36,4 +37,36 @@ func TestCountStatus(t *testing.T) {
 	if response.Code != http.StatusOK {
 		t.Fatalf("Response body did not contain expected %v:\n\tbody: %v", "200", response.Code)
 	}
+}
+
+func TestCreateWithInvalidBody(t *testing.T) {
+	url := "/create"
+	request, _ := http.NewRequest("POST", url, strings.NewReader(""))
+	response := httptest.NewRecorder()
+	handleCreate(response, request)
+
+	assert.Equal(t, 500, response.Code)
+}
+
+func TestCreateNotifier(t *testing.T) {
+	params := url.Values{"notification_type": {"slack"}, "class": {"User"}, "template": {"test"}, "rules": {"{}"}}
+	request, _ := http.NewRequest("POST", "/create", strings.NewReader(params.Encode()))
+	request.Header.Set(
+		"Content-Type",
+		"application/x-www-form-urlencoded; param=value",
+	)
+	response := httptest.NewRecorder()
+	handleCreate(response, request)
+
+	assert.Equal(t, 302, response.Code)
+
+	var notifier Notifier
+	err := db.Get(&notifier, "SELECT * FROM notifiers ORDER BY id DESC LIMIT 1")
+	if err != nil {
+		log.Fatal(err)
+	}
+	assert.Equal(t, "slack", notifier.NotificationType)
+	assert.Equal(t, "User", notifier.Class)
+	assert.Equal(t, "test", notifier.Template)
+	assert.Equal(t, "{}", notifier.Rules)
 }

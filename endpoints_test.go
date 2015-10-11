@@ -29,6 +29,18 @@ func TestIndexStatus(t *testing.T) {
 	}
 }
 
+func TestNewStatus(t *testing.T) {
+	url := "/new"
+	request, _ := http.NewRequest("GET", url, nil)
+	response := httptest.NewRecorder()
+
+	handleNew(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Fatalf("Response body did not contain expected %v:\n\tbody: %v", "200", response.Code)
+	}
+}
+
 func TestCountStatus(t *testing.T) {
 	url := "/v1/count"
 	request, _ := http.NewRequest("GET", url, nil)

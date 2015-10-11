@@ -102,16 +102,6 @@ func (e *Event) notify() {
 	}
 }
 
-func countRows() int {
-	var rows int
-	err := db.QueryRow("SELECT COUNT(*) FROM incoming").Scan(&rows)
-	if err != nil {
-		log.Fatal("rowcount: ", err)
-	}
-
-	return rows
-}
-
 func incomingItems() chan<- []byte {
 	incomingChan := make(chan []byte)
 
@@ -140,7 +130,6 @@ func incomingItems() chan<- []byte {
 }
 
 func listenToUDP(conn *net.UDPConn) {
-	// updates := keyLogger()
 	incomingChan := incomingItems()
 
 	buffer := make([]byte, maxPacketSize)
@@ -170,22 +159,13 @@ func main() {
 	}
 
 	go listenToUDP(conn)
-	http.HandleFunc("/favicon.ico", handleFavicon)
-	http.HandleFunc("/", handleIndex)
-	http.HandleFunc("/new", handleNew)
-	http.HandleFunc("/create", handleCreate)
-	http.HandleFunc("/preview", handlePreview)
 	http.HandleFunc("/v1/count", handleCount)
-	http.HandleFunc("/static/", staticHandler)
 
 	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")
 	if err != nil {
 		log.Fatal("DB Open()", err)
 	}
 	defer db.Close()
-
-	rows := countRows()
-	fmt.Println("Total rows:", rows)
 
 	fmt.Println("Will start listening on port 8000")
 	http.ListenAndServe(":8000", nil)

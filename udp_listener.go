@@ -1,11 +1,11 @@
 package main
 
 import (
-	"database/sql"
+	// "database/sql"
+	"bytes"
 	"encoding/json"
 	"fmt"
-	// _ "github.com/jmoiron/sqlx"
-	"bytes"
+	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	_ "github.com/lib/pq"
 	"log"
@@ -18,7 +18,7 @@ import (
 
 const maxPacketSize = 1024 * 1024
 
-var db *sql.DB
+var db *sqlx.DB
 
 type Stat struct {
 	Key   string         `json:"key"`
@@ -28,6 +28,12 @@ type Stat struct {
 type Notifier struct {
 	Class    string
 	Template string
+}
+
+type dbNotifier struct {
+	Id       int    `db:"id"`
+	Class    string `db:"class"`
+	Template string `db:"template"`
 }
 
 func (s *Stat) persist() {
@@ -40,36 +46,42 @@ func (s *Stat) persist() {
 }
 
 func (s *Stat) notify() {
-	sendEmail(s.Key, string(s.Value))
+	// find (active) notifiers
+	// execute them all
+
+	var err error
+
+	notifiers := []dbNotifier{}
+	err = db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", s.Key)
+	if err != nil {
+		log.Fatal("db.Select ", err)
+	}
+	fmt.Printf("Found %d notifiers\n", len(notifiers))
+	for i := 0; i < len(notifiers); i++ {
+		s.specialNotify(&notifiers[i])
+	}
 }
 
-func (s *Stat) specialNotify() {
+func (s *Stat) specialNotify(notifier *dbNotifier) {
+	fmt.Printf("Notifying notifier id: %d\n", notifier.Id)
 	var err error
 	var doc bytes.Buffer
 
-	n := Notifier{
-		"mark",
-		"{{.Number}}: is pretty awesome!, {{.Yeah}} nigga",
-	}
-
 	t := template.New("notificationTemplate")
-	t, err = t.Parse(n.Template)
+	t, err = t.Parse(notifier.Template)
 	if err != nil {
 		log.Fatal("t.Parse of n.Template", err)
 	}
 
-	jmap := map[string]string{
-		"Number": "1000test",
-		"Yeah":   "yeayeah",
-	}
-	err = t.Execute(&doc, jmap)
+	m := map[string]interface{}{}
+	s.Value.Unmarshal(&m)
+
+	err = t.Execute(&doc, m)
 	if err != nil {
 		log.Fatal("t.Execute ", err)
 	}
 
-	fmt.Println(doc)
-	sendEmail(s.Key, string(doc.Bytes()))
-
+	sendEmail(s.Key, doc.Bytes())
 }
 
 func countRows() int {
@@ -102,8 +114,7 @@ func listenToUDP(conn *net.UDPConn) {
 		}
 
 		stat.persist()
-		// stat.notify()
-		stat.specialNotify()
+		stat.notify()
 	}
 }
 
@@ -144,7 +155,7 @@ type EmailData struct {
 	Body    string
 }
 
-func sendEmail(class string, data string) {
+func sendEmail(class string, data []byte) {
 	var err error
 	var doc bytes.Buffer
 
@@ -153,12 +164,11 @@ func sendEmail(class string, data string) {
 	if err != nil {
 		log.Fatal("t.Parse ", err)
 	}
-	// bodyString := fmt.Sprintf("<h1>class: %s</h1>\\n<p>data: %s</p>", class, data)
 	context := &EmailData{
 		"Springest Dev <developers@springest.nl>",
 		"recipient@example.com",
 		"Email subject line",
-		data,
+		string(data),
 	}
 	err = t.Execute(&doc, context)
 	if err != nil {
@@ -182,7 +192,7 @@ func main() {
 		log.Fatal("ListenUDP", err)
 	}
 
-	db, err = sql.Open("postgres", "user=markmulder dbname=notifier sslmode=disable")
+	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")
 	if err != nil {
 		log.Fatal("DB Open()", err)
 	}

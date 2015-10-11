@@ -28,5 +28,5 @@ end
 
 socket = UDPSocket.new
 s = Stats.new
-message = {mark: 'is cool!'}
+message = {mark: 'is cool!', number: rand(15)}
 s.track({'key' => 'mark', 'value' => message})

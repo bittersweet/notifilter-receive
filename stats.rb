@@ -21,6 +21,7 @@ class Stats
   def flush
     @backlog.each do |item|
       message = item.to_json
+      puts message
       socket.send(message, 0, "127.0.0.1", 8000)
     end
     @backlog.clear
@@ -32,8 +33,9 @@ jobs = []
 10.times do
   jobs << Thread.new do
     s = Stats.new
-    100.times do |i|
-      s.track({'key' => 'mark', 'value' => rand(100).to_s})
+    10.times do |i|
+      message = {mark: 'is cool!', number: rand(10)}
+      s.track({'key' => 'mark', 'value' => message})
     end
   end
 end

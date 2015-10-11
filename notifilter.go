@@ -20,10 +20,12 @@ const maxPacketSize = 1024 * 1024
 
 var db *sqlx.DB
 
+// Config will be populated with settings loaded from the environment or
+// local defaults
 type Config struct {
 	AppPort      int    `default:"8000"`
 	DBHost       string `default:"127.0.0.1"`
-	DBUser       string `default:"markmulder"`
+	DBUser       string `default:""`
 	DBPassword   string `default:""`
 	DBName       string `default:"notifilter_development"`
 	ESHost       string `default:"127.0.0.1"`
@@ -31,9 +33,10 @@ type Config struct {
 	SlackHookURL string `required:"true"`
 }
 
-// C holds main application config loaded from ENV variables
+// C is a global variable that holds loaded config settings
 var C Config
 
+// ESClient is a global variable that points to our ES client
 var ESClient elasticsearch.Client
 
 // Event will hold incoming data and will be persisted to ES eventually

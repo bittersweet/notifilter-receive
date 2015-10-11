@@ -25,6 +25,11 @@ type Stat struct {
 	Value types.JsonText `json:"value"`
 }
 
+type Notifier struct {
+	Class    string
+	Template string
+}
+
 func (s *Stat) persist() {
 	var incomingId int
 	err := db.QueryRow(`INSERT INTO incoming(received_at, data) VALUES($1, $2) RETURNING id`, time.Now(), s.Value).Scan(&incomingId)
@@ -36,6 +41,35 @@ func (s *Stat) persist() {
 
 func (s *Stat) notify() {
 	sendEmail(s.Key, string(s.Value))
+}
+
+func (s *Stat) specialNotify() {
+	var err error
+	var doc bytes.Buffer
+
+	n := Notifier{
+		"mark",
+		"{{.Number}}: is pretty awesome!, {{.Yeah}} nigga",
+	}
+
+	t := template.New("notificationTemplate")
+	t, err = t.Parse(n.Template)
+	if err != nil {
+		log.Fatal("t.Parse of n.Template", err)
+	}
+
+	jmap := map[string]string{
+		"Number": "1000test",
+		"Yeah":   "yeayeah",
+	}
+	err = t.Execute(&doc, jmap)
+	if err != nil {
+		log.Fatal("t.Execute ", err)
+	}
+
+	fmt.Println(doc)
+	sendEmail(s.Key, string(doc.Bytes()))
+
 }
 
 func countRows() int {
@@ -68,7 +102,8 @@ func listenToUDP(conn *net.UDPConn) {
 		}
 
 		stat.persist()
-		stat.notify()
+		// stat.notify()
+		stat.specialNotify()
 	}
 }
 
@@ -85,8 +120,6 @@ func handleCount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("MarshalIndent", err)
 	}
-
-	sendEmail("testClass", "body")
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(output)
@@ -120,12 +153,12 @@ func sendEmail(class string, data string) {
 	if err != nil {
 		log.Fatal("t.Parse ", err)
 	}
-	bodyString := fmt.Sprintf("<h1>class: %s</h1>\n<p>data: %s</p>", class, data)
+	// bodyString := fmt.Sprintf("<h1>class: %s</h1>\\n<p>data: %s</p>", class, data)
 	context := &EmailData{
 		"Springest Dev <developers@springest.nl>",
 		"recipient@example.com",
 		"Email subject line",
-		bodyString,
+		data,
 	}
 	err = t.Execute(&doc, context)
 	if err != nil {

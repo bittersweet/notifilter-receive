@@ -32,7 +32,7 @@ func SetTransport(t http.RoundTripper) {
 }
 
 // TODO: Get settings from env variables
-func (s *slackNotifier) sendMessage(class string, data []byte) NotifierResponse {
+func (s *slackNotifier) sendMessage(event_name string, data []byte) NotifierResponse {
 	client := &http.Client{Transport: getTransport()}
 	// https://api.slack.com/methods/chat.postMessage
 	// format := "http://slack.com/api/chat.postMessage?token=%s&channel=%s&text=%s&username=%s&icon_url=%s"

@@ -29,7 +29,7 @@ type EmailData struct {
 	Body    string
 }
 
-func (e *emailNotifier) sendMessage(class string, data []byte) NotifierResponse {
+func (e *emailNotifier) sendMessage(event_name string, data []byte) NotifierResponse {
 	var err error
 	var doc bytes.Buffer
 

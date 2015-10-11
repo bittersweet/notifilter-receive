@@ -43,7 +43,7 @@ func (e *Event) persist() {
 // rules for those notifications have been satisfied
 func (e *Event) notify() {
 	notifiers := []Notifier{}
-	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", e.Identifier)
+	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE event_name=$1", e.Identifier)
 	if err != nil {
 		log.Fatal("db.Select ", err)
 	}

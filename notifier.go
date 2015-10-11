@@ -13,6 +13,8 @@ type NotifierResponse struct {
 	error    error
 }
 
+// Every notifier we create needs to adhere to this interface, so we can
+// substitute another one when testing
 type MessageNotifier interface {
 	sendMessage(string, []byte) NotifierResponse
 }
@@ -20,7 +22,7 @@ type MessageNotifier interface {
 type Notifier struct {
 	Id               int            `db:"id"`
 	NotificationType string         `db:"notification_type"`
-	Class            string         `db:"class"`
+	EventName        string         `db:"event_name"`
 	Template         string         `db:"template"`
 	Rules            types.JsonText `db:"rules"`
 	// type slack/email/direct to phone

@@ -8,13 +8,13 @@ import (
 )
 
 type LocalMessageNotifier struct {
-	class     string
-	message   []byte
-	processed bool
+	event_name string
+	message    []byte
+	processed  bool
 }
 
-func (mn *LocalMessageNotifier) sendMessage(class string, data []byte) NotifierResponse {
-	mn.class = class
+func (mn *LocalMessageNotifier) sendMessage(event_name string, data []byte) NotifierResponse {
+	mn.event_name = event_name
 	mn.message = data
 	mn.processed = true
 
@@ -37,7 +37,7 @@ func TestNotifierCheckRulesSingle(t *testing.T) {
 	n := Notifier{
 		Id:               1,
 		NotificationType: "email",
-		Class:            "User",
+		EventName:        "User",
 		Template:         "name: {{.name}}",
 		Rules:            rules,
 	}
@@ -54,7 +54,7 @@ func TestNotifierCheckRulesMultiple(t *testing.T) {
 	n := Notifier{
 		Id:               1,
 		NotificationType: "email",
-		Class:            "User",
+		EventName:        "User",
 		Template:         "name: {{.name}}",
 		Rules:            rules,
 	}
@@ -70,7 +70,7 @@ func TestNotifierCheckRulesSettingIsNull(t *testing.T) {
 	n := Notifier{
 		Id:               1,
 		NotificationType: "email",
-		Class:            "User",
+		EventName:        "User",
 		Template:         "name: {{.name}}",
 		Rules:            rules,
 	}
@@ -86,7 +86,7 @@ func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 	n := Notifier{
 		Id:               1,
 		NotificationType: "email",
-		Class:            "User",
+		EventName:        "User",
 		Template:         "name: {{.name}}",
 		Rules:            rules,
 	}
@@ -101,7 +101,7 @@ func TestNotifierNotify(t *testing.T) {
 	n := Notifier{
 		Id:               1,
 		NotificationType: "email",
-		Class:            "User",
+		EventName:        "User",
 		Template:         "name: {{.name}}",
 	}
 
@@ -111,7 +111,7 @@ func TestNotifierNotify(t *testing.T) {
 	mn := &LocalMessageNotifier{}
 	n.notify(&s, mn)
 
-	assert.Equal(t, mn.class, "Mark")
+	assert.Equal(t, mn.event_name, "Mark")
 	assert.Equal(t, mn.message, []byte("name: Go"))
 	assert.Equal(t, mn.processed, true)
 }
@@ -121,7 +121,7 @@ func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
 	n := Notifier{
 		Id:               1,
 		NotificationType: "email",
-		Class:            "User",
+		EventName:        "User",
 		Template:         "name: {{.name}}",
 		Rules:            rules,
 	}
@@ -139,7 +139,7 @@ func TestNotifierRenderTemplate(t *testing.T) {
 	n := Notifier{
 		Id:               1,
 		NotificationType: "email",
-		Class:            "User",
+		EventName:        "User",
 		Template:         "name: {{.name}}",
 	}
 

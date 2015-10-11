@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/bittersweet/notifilter/notifiers"
@@ -29,13 +28,13 @@ func setupTestNotifier(data types.JsonText) Event {
 
 func TestNewNotifier(t *testing.T) {
 	n := Notifier{}
-	assert.Equal(t, n.newNotifier(), &notifiers.SlackNotifier{})
+	assert.Equal(t, &notifiers.SlackNotifier{}, n.newNotifier())
 
 	n.NotificationType = "email"
-	assert.Equal(t, n.newNotifier(), &notifiers.EmailNotifier{})
+	assert.Equal(t, &notifiers.EmailNotifier{}, n.newNotifier())
 
 	n.NotificationType = "slack"
-	assert.Equal(t, n.newNotifier(), &notifiers.SlackNotifier{})
+	assert.Equal(t, &notifiers.SlackNotifier{}, n.newNotifier())
 }
 
 func TestNotifierCheckRulesSingle(t *testing.T) {
@@ -50,7 +49,7 @@ func TestNotifierCheckRulesSingle(t *testing.T) {
 	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
-	assert.Equal(t, n.checkRules(&event), true)
+	assert.Equal(t, true, n.checkRules(&event))
 }
 
 func TestNotifierCheckRulesMultiple(t *testing.T) {
@@ -65,7 +64,7 @@ func TestNotifierCheckRulesMultiple(t *testing.T) {
 	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
-	assert.Equal(t, n.checkRules(&event), true)
+	assert.Equal(t, true, n.checkRules(&event))
 }
 
 func TestNotifierCheckRulesSettingIsNull(t *testing.T) {
@@ -80,7 +79,7 @@ func TestNotifierCheckRulesSettingIsNull(t *testing.T) {
 	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
-	assert.Equal(t, n.checkRules(&event), true)
+	assert.Equal(t, true, n.checkRules(&event))
 }
 
 func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
@@ -95,7 +94,7 @@ func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
-	assert.Equal(t, n.checkRules(&event), true)
+	assert.Equal(t, true, n.checkRules(&event))
 }
 
 func TestNotifierNotify(t *testing.T) {
@@ -112,9 +111,9 @@ func TestNotifierNotify(t *testing.T) {
 	mn := &LocalMessageNotifier{}
 	n.notify(&event, mn)
 
-	assert.Equal(t, mn.EventName, "signup")
-	assert.Equal(t, mn.Message, []byte("name: Go"))
-	assert.Equal(t, mn.Processed, true)
+	assert.Equal(t, "signup", mn.EventName)
+	assert.Equal(t, []byte("name: Go"), mn.Message)
+	assert.Equal(t, true, mn.Processed)
 }
 
 func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
@@ -132,7 +131,7 @@ func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
 	mn := &LocalMessageNotifier{}
 	n.notify(&event, mn)
 
-	assert.Equal(t, mn.Processed, false)
+	assert.Equal(t, false, mn.Processed)
 }
 
 func TestNotifierRenderTemplate(t *testing.T) {
@@ -147,7 +146,7 @@ func TestNotifierRenderTemplate(t *testing.T) {
 
 	result, err := n.renderTemplate(&event)
 	expected := []byte("name: Go")
-	assert.Equal(t, result, expected)
+	assert.Equal(t, expected, result)
 	assert.Nil(t, err)
 }
 
@@ -161,7 +160,7 @@ func TestNotifierRenderWithInvalidTemplate(t *testing.T) {
 
 	result, err := n.renderTemplate(&event)
 	expected := []byte("")
-	assert.Equal(t, result, expected)
+	assert.Equal(t, expected, result)
 	assert.NotNil(t, err)
 	assert.Equal(t, "template: notificationTemplate:1: unexpected \"}\" in operand", err.Error())
 }
@@ -176,7 +175,6 @@ func TestNotifierRenderWithInvalidData(t *testing.T) {
 
 	result, err := n.renderTemplate(&event)
 	expected := []byte("name: <no value>")
-	fmt.Println("resut, ", string(result))
 	assert.Equal(t, expected, result)
 	assert.Nil(t, err)
 }
@@ -192,14 +190,14 @@ func TestNotifierRenderTemplateWithLogic(t *testing.T) {
 
 	result, _ := n.renderTemplate(&event)
 	expected := []byte("Active!")
-	assert.Equal(t, result, expected)
+	assert.Equal(t, expected, result)
 
 	data = types.JsonText(`{"active": false, "name": "Go", "number": 12}`)
 	event = Event{"signup", data}
 
 	result, _ = n.renderTemplate(&event)
 	expected = []byte("inactive")
-	assert.Equal(t, result, expected)
+	assert.Equal(t, expected, result)
 }
 
 func TestNotifierRenderTemplateWithAdvancedLogic(t *testing.T) {
@@ -211,12 +209,12 @@ func TestNotifierRenderTemplateWithAdvancedLogic(t *testing.T) {
 
 	result, _ := n.renderTemplate(&event)
 	expected := "Incoming conversion: (Making it rain!) 12"
-	assert.Equal(t, string(result), expected)
+	assert.Equal(t, expected, string(result))
 
 	data = types.JsonText(`{"active": true, "name": "Go", "number": 10}`)
 	event = setupTestNotifier(data)
 
 	result, _ = n.renderTemplate(&event)
 	expected = "Incoming conversion: 10"
-	assert.Equal(t, string(result), expected)
+	assert.Equal(t, expected, string(result))
 }

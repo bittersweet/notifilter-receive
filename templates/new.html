@@ -38,10 +38,7 @@
       <br><br>
       <textarea rows="4" cols="50" name="rules" id="rules"></textarea>
       <br><br>
-      <input type="submit" value="Create notifier">
-    </form>
 
-    <form action="#" id="rulesForm">
       <div id="rulesContainer">
         <div class="ruleSet">
           <select name="key">
@@ -67,7 +64,11 @@
         </div>
       </div>
       <input type="button" name="addRule" value="Add rule">
-      <input type="submit" value="Generate">
+      <input type="button" name="generateRules" value="Generate Rules">
+      <br>
+      <br>
+
+      <input type="submit" value="Create notifier">
     </form>
     <script>
       function duplicateSettings() {
@@ -99,7 +100,7 @@
       }
 
       $(document).ready(function() {
-        $("#rulesForm").on("submit", function(event) {
+        $("#notifierForm input[name=generateRules]").on("click", function(event) {
           event.preventDefault();
 
           rules = generateSettingsFromFields();
@@ -108,12 +109,12 @@
           $("#notifierForm #rules").text(input);
         })
 
-        $("#rulesForm input[name=addRule]").on("click", function(event) {
+        $("#notifierForm input[name=addRule]").on("click", function(event) {
           event.preventDefault();
           duplicateSettings();
         });
 
-        $("#rulesForm").on("click",  "input[name=removeRule]", function(event) {
+        $("#notifierForm").on("click",  "input[name=removeRule]", function(event) {
           event.preventDefault();
           $(this).parent().remove();
         });

@@ -95,6 +95,7 @@ Notify:
 		notifier := notifiers[i]
 		nt := notifier.NotificationType
 		fmt.Printf("Notifying notifier id: %d type: %s\n", notifier.Id, nt)
+		fmt.Printf("Incoming data: %v\n", s.toMap())
 
 		if !notifier.checkRules(s) {
 			continue Notify

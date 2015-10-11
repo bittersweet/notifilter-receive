@@ -164,7 +164,7 @@ func main() {
 	http.HandleFunc("/v1/count", handleCount)
 
 	fmt.Println("Will start listening on port 8000")
-	http.ListenAndServe(":8000", nil)
+	err = http.ListenAndServe(":8000", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe ", err)
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,5 +23,4 @@ func TestCountStatus(t *testing.T) {
 	countHandle.ServeHTTP(response, request)
 
 	assert.Equal(t, http.StatusOK, response.Code)
-	fmt.Println(response.Body)
 }

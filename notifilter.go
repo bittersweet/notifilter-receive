@@ -18,7 +18,17 @@ import (
 
 const maxPacketSize = 1024 * 1024
 
+// db holds our connection pool to Postgres
 var db *sqlx.DB
+
+// C is a global variable that holds loaded config settings
+var C Config
+
+// ESClient is a global variable that points to our ES client
+var ESClient elasticsearch.Client
+
+// Time the app started up
+var startTime = time.Now()
 
 // Config will be populated with settings loaded from the environment or
 // local defaults
@@ -32,12 +42,6 @@ type Config struct {
 	ESPort       int    `default:"9200"`
 	SlackHookURL string `required:"true"`
 }
-
-// C is a global variable that holds loaded config settings
-var C Config
-
-// ESClient is a global variable that points to our ES client
-var ESClient elasticsearch.Client
 
 // Event will hold incoming data and will be persisted to ES eventually
 type Event struct {
@@ -193,6 +197,7 @@ func main() {
 	}
 
 	http.Handle("/v1/count", handleCount(&ESClient))
+	http.Handle("/v1/statistics", handleStatistics(startTime))
 
 	fmt.Printf("Will start listening on port %s\n", port)
 	err = http.ListenAndServe(port, nil)

@@ -20,8 +20,9 @@ var db *sqlx.DB
 
 // Event will hold incoming data and will be persisted to ES eventually
 type Event struct {
-	Identifier string         `json:"identifier"`
-	Data       types.JsonText `json:"data"`
+	Application string         `json:"application"`
+	Identifier  string         `json:"identifier"`
+	Data        types.JsonText `json:"data"`
 }
 
 // toMap transforms the raw JSON data into a map
@@ -33,7 +34,7 @@ func (e *Event) toMap() map[string]interface{} {
 
 // persist saves the incoming event to Elasticsearch
 func (e *Event) persist() {
-	err := elasticsearch.Persist(e.Identifier, e.toMap())
+	err := elasticsearch.Persist(e.Application, e.Identifier, e.toMap())
 	if err != nil {
 		log.Fatal("Error persisting to ElasticSearch:", err)
 	}
@@ -43,7 +44,7 @@ func (e *Event) persist() {
 // rules for those notifications have been satisfied
 func (e *Event) notify() {
 	notifiers := []Notifier{}
-	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE event_name=$1", e.Identifier)
+	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE application=$1 AND event_name=$2", e.Application, e.Identifier)
 	if err != nil {
 		log.Fatal("db.Select ", err)
 	}

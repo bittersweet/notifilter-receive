@@ -14,6 +14,7 @@ import (
 // check incoming events (rules) and what to do when those rules are matched.
 type Notifier struct {
 	ID               int            `db:"id"`
+	Application      string         `db:"application"`
 	EventName        string         `db:"event_name"`
 	Template         string         `db:"template"`
 	Rules            types.JsonText `db:"rules"`

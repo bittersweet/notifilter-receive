@@ -10,22 +10,22 @@ import (
 	"time"
 )
 
-// ESPayload is a struct that we convert to JSON to send data to ES
-type ESPayload struct {
-	Name       string                 `json:"name"`
-	ReceivedAt time.Time              `json:"received_at"`
-	Data       map[string]interface{} `json:"data"`
-}
-
 // Persist saves incoming events to Elasticsearch
-func Persist(name string, data map[string]interface{}) error {
-	log.Printf("[ES] Persisting to %s: %v\n", name, data)
+func Persist(application string, name string, data map[string]interface{}) error {
+	log.Printf("[ES] persisting application=%s event=%s data=%v\n", application, name, data)
 
-	payload := ESPayload{
-		Name:       name,
-		ReceivedAt: time.Now(),
-		Data:       data,
+	payload := struct {
+		Application string                 `json:"application"`
+		Name        string                 `json:"name"`
+		ReceivedAt  time.Time              `json:"received_at"`
+		Data        map[string]interface{} `json:"data"`
+	}{
+		Application: application,
+		Name:        name,
+		ReceivedAt:  time.Now(),
+		Data:        data,
 	}
+
 	body, _ := json.Marshal(payload)
 	resp, err := http.Post("http://127.0.0.1:9200/notifilter/event/?pretty", "application/json", bytes.NewReader(body))
 	if err != nil {

@@ -8,16 +8,18 @@ curl -XPUT 'http://localhost:9200/notifilter' -d '
   "mappings": {
     "event": {
       "properties": {
-        "key": {
+        "app": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "name": {
           "type": "string",
           "index": "not_analyzed"
         },
         "received_at": {
           "type": "date"
         }
-      }
-    },
-    "my_type": {
+      },
       "dynamic_templates": [
         {
           "notanalyzed": {
@@ -29,8 +31,7 @@ curl -XPUT 'http://localhost:9200/notifilter' -d '
             "match_mapping_type": "string"
           }
         }
-      ],
-      "properties": {}
+      ]
     }
   }
 }

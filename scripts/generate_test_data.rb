@@ -37,7 +37,7 @@ jobs = []
     s = Stats.new
     1000.times do |i|
       data = { user_id: rand(10), created_at: Time.now }
-      s.track({'identifier' => 'signup', 'data' => data})
+      s.track({'application' => 'test_app', 'identifier' => 'signup', 'data' => data})
     end
   end
 end

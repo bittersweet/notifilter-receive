@@ -1,24 +1,28 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/stretchr/testify/assert"
 )
 
-func init() {
-	db, _ = sqlx.Connect("postgres", "user=markmulder dbname=notifilter_development sslmode=disable")
+type MockElasticsearchClient struct {
+}
+
+func (mec MockElasticsearchClient) EventCount() (int, error) {
+	return 1, nil
 }
 
 func TestCountStatus(t *testing.T) {
-	url := "/v1/count"
-	request, _ := http.NewRequest("GET", url, nil)
+	mockES := MockElasticsearchClient{}
+	countHandle := handleCount(mockES)
+	request, _ := http.NewRequest("GET", "/v1/count", nil)
 	response := httptest.NewRecorder()
-	handleCount(response, request)
+	countHandle.ServeHTTP(response, request)
 
-	if response.Code != http.StatusOK {
-		t.Fatalf("Response body did not contain expected %v:\n\tbody: %v", "200", response.Code)
-	}
+	assert.Equal(t, http.StatusOK, response.Code)
+	fmt.Println(response.Body)
 }

@@ -17,6 +17,10 @@ type Client struct {
 	Index string
 }
 
+type ElasticsearchClient interface {
+	EventCount() (int, error)
+}
+
 // URL returns the full URL to the elasticsearch host, port and index
 func (c *Client) URL() string {
 	return fmt.Sprintf("http://%s:%d/%s/event", c.Host, c.Port, c.Index)

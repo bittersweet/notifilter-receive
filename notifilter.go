@@ -192,7 +192,7 @@ func main() {
 		Index: "notifilter",
 	}
 
-	http.HandleFunc("/v1/count", handleCount)
+	http.Handle("/v1/count", handleCount(&ESClient))
 
 	fmt.Printf("Will start listening on port %s\n", port)
 	err = http.ListenAndServe(port, nil)

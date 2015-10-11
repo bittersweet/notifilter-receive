@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/bittersweet/notifilter/elasticsearch"
 )
 
 func trackTime(start time.Time, name string) {
@@ -17,7 +15,7 @@ func trackTime(start time.Time, name string) {
 func handleCount(w http.ResponseWriter, r *http.Request) {
 	defer trackTime(time.Now(), "handleCount")
 
-	count, err := elasticsearch.EventCount()
+	count, err := ESClient.EventCount()
 	if err != nil {
 		log.Println("Error while getting count from ES", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

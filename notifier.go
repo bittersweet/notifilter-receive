@@ -26,9 +26,17 @@ func (n *Notifier) newNotifier() notifiers.MessageNotifier {
 	case "email":
 		return &notifiers.EmailNotifier{}
 	case "slack":
-		return &notifiers.SlackNotifier{}
+		return &notifiers.SlackNotifier{
+			Token:    C.SlackToken,
+			Username: C.SlackUsername,
+			Icon:     C.SlackIcon,
+		}
 	}
-	return &notifiers.SlackNotifier{}
+	return &notifiers.SlackNotifier{
+		Token:    C.SlackToken,
+		Username: C.SlackUsername,
+		Icon:     C.SlackIcon,
+	}
 }
 
 func (n *Notifier) getRules() []*rule {

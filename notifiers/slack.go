@@ -11,17 +11,19 @@ import (
 
 // SlackNotifier is a notifier accountable for sending notifications to Slack
 type SlackNotifier struct {
+	Token    string
+	Username string
+	Icon     string
 }
 
 // SendMessage sends an event with processed data to a selected Slack channel (target)
 func (s *SlackNotifier) SendMessage(eventName string, target string, data []byte) {
 	// https://api.slack.com/methods/chat.postMessage
-	// TODO: get an application token instead of using a personal one
-	token := "xoxp-2152199637-2401973798-4106776238-a6cdd3"
+	token := s.Token
 	channel := target
 	text := url.QueryEscape(string(data))
-	username := "Notifier"
-	icon := "http://lorempixel.com/48/48/"
+	username := s.Username
+	icon := s.Icon
 
 	format := "http://slack.com/api/chat.postMessage?token=%s&channel=%s&text=%s&username=%s&icon_url=%s"
 	url := fmt.Sprintf(format, token, channel, text, username, icon)

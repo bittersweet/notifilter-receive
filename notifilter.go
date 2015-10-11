@@ -13,12 +13,31 @@ import (
 	"github.com/bittersweet/notifilter/elasticsearch"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
+	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
 )
 
 const maxPacketSize = 1024 * 1024
 
 var db *sqlx.DB
+
+type Config struct {
+	AppPort       int    `default:"8000"`
+	DBHost        string `default:"127.0.0.1"`
+	DBUser        string `default:"markmulder"`
+	DBPassword    string `default:""`
+	DBName        string `default:"notifilter_development"`
+	ESHost        string `default:"127.0.0.1"`
+	ESPort        int    `default:"9200"`
+	SlackToken    string `required:"true"`
+	SlackUsername string `default:"Notifilter"`
+	SlackIcon     string `default:"http://lorempixel.com/48/48/"`
+}
+
+// C holds main application config loaded from ENV variables
+var C Config
+
+var ESClient elasticsearch.Client
 
 // Event will hold incoming data and will be persisted to ES eventually
 type Event struct {
@@ -41,7 +60,7 @@ func (e *Event) dataToMap() map[string]interface{} {
 
 // persist saves the incoming event to Elasticsearch
 func (e *Event) persist() {
-	err := elasticsearch.Persist(e.requestID, e.Application, e.Identifier, e.dataToMap())
+	err := ESClient.Persist(e.requestID, e.Application, e.Identifier, e.dataToMap())
 	if err != nil {
 		e.log("Error persisting to ElasticSearch:", err)
 	}
@@ -145,7 +164,14 @@ func listenToUDP(conn *net.UDPConn) {
 func main() {
 	runtime.GOMAXPROCS(4)
 
-	addr, err := net.ResolveUDPAddr("udp", ":8000")
+	err := envconfig.Process("notifilter", &C)
+	if err != nil {
+		log.Fatal("Could not load config: ", err.Error())
+	}
+	log.Printf("Config loaded: %#v\n", C)
+	port := fmt.Sprintf(":%d", C.AppPort)
+
+	addr, err := net.ResolveUDPAddr("udp", port)
 	if err != nil {
 		log.Fatal("ResolveUDPAddr", err)
 	}
@@ -155,16 +181,23 @@ func main() {
 	}
 	go listenToUDP(conn)
 
-	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifilter_development sslmode=disable")
+	pgStr := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable", C.DBHost, C.DBUser, C.DBName)
+	db, err = sqlx.Connect("postgres", pgStr)
 	if err != nil {
 		log.Fatal("DB Open()", err)
 	}
 	defer db.Close()
 
+	ESClient = elasticsearch.Client{
+		Host:  C.ESHost,
+		Port:  C.ESPort,
+		Index: "notifilter",
+	}
+
 	http.HandleFunc("/v1/count", handleCount)
 
-	fmt.Println("Will start listening on port 8000")
-	err = http.ListenAndServe(":8000", nil)
+	fmt.Printf("Will start listening on port %s\n", port)
+	err = http.ListenAndServe(port, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe ", err)
 	}

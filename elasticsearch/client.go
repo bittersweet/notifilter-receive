@@ -4,14 +4,26 @@ package elasticsearch
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
 )
 
+type Client struct {
+	Host  string
+	Port  int
+	Index string
+}
+
+// URL returns the full URL to the elasticsearch host, port and index
+func (c *Client) URL() string {
+	return fmt.Sprintf("http://%s:%d/%s/event", c.Host, c.Port, c.Index)
+}
+
 // Persist saves incoming events to Elasticsearch
-func Persist(requestID string, application string, name string, data map[string]interface{}) error {
+func (c *Client) Persist(requestID string, application string, name string, data map[string]interface{}) error {
 	log.Printf("%s [ES] persisting application=%s event=%s data=%v\n", requestID, application, name, data)
 
 	payload := struct {
@@ -27,7 +39,7 @@ func Persist(requestID string, application string, name string, data map[string]
 	}
 
 	body, _ := json.Marshal(payload)
-	resp, err := http.Post("http://127.0.0.1:9200/notifilter/event/?pretty", "application/json", bytes.NewReader(body))
+	resp, err := http.Post(c.URL(), "application/json", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -41,14 +53,14 @@ func Persist(requestID string, application string, name string, data map[string]
 }
 
 // EventCount returns the total amount of events persisted to Elasticsearch
-func EventCount() (int, error) {
+func (c *Client) EventCount() (int, error) {
 	type response struct {
 		Hits struct {
 			Total int `json:"total"`
 		} `json:"hits"`
 	}
 
-	resp, err := http.Get("http://127.0.0.1:9200/notifilter/event/_search?size=0")
+	resp, err := http.Get(c.URL() + "/_search?size=0")
 	if err != nil {
 		return 0, err
 	}

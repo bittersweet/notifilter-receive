@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/jmoiron/sqlx/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -81,7 +82,7 @@ func TestCreateNotifier(t *testing.T) {
 	assert.Equal(t, "slack", notifier.NotificationType)
 	assert.Equal(t, "User", notifier.Class)
 	assert.Equal(t, "test", notifier.Template)
-	assert.Equal(t, "{}", notifier.Rules)
+	assert.Equal(t, types.JsonText(`{}`), notifier.Rules)
 }
 
 func TestPreview(t *testing.T) {

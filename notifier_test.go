@@ -26,7 +26,7 @@ func TestNewNotifier(t *testing.T) {
 	assert.Equal(t, n.newNotifier(), &slackNotifier{})
 
 	n.NotificationType = "email"
-	assert.Equal(t, n.newNotifier(), &slackNotifier{})
+	assert.Equal(t, n.newNotifier(), &emailNotifier{})
 
 	n.NotificationType = "slack"
 	assert.Equal(t, n.newNotifier(), &slackNotifier{})
@@ -147,7 +147,7 @@ func TestNotifierRenderTemplate(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	result := n.renderTemplate(&s)
-	expected := "name: Go"
+	expected := []byte("name: Go")
 	assert.Equal(t, result, expected)
 }
 
@@ -161,14 +161,14 @@ func TestNotifierRenderTemplateWithLogic(t *testing.T) {
 	s := Stat{"Mark", jt}
 
 	result := n.renderTemplate(&s)
-	expected := "Active!"
+	expected := []byte("Active!")
 	assert.Equal(t, result, expected)
 
 	jt = types.JsonText(`{"active": false, "name": "Go", "number": 12}`)
 	s = Stat{"Mark", jt}
 
 	result = n.renderTemplate(&s)
-	expected = "inactive"
+	expected = []byte("inactive")
 	assert.Equal(t, result, expected)
 }
 

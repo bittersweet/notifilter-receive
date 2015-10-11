@@ -16,9 +16,8 @@ type ESPayload struct {
 	Data       map[string]interface{} `json:"data"`
 }
 
-func Persist(key string, data map[string]interface{}) {
-	fmt.Println("Printing from ES Package: ", key)
-	fmt.Println("Printing from ES Package: ", data)
+func Persist(key string, data map[string]interface{}) error {
+	fmt.Printf("[ES] Persisting to %s: %v\n", key, data)
 
 	payload := ESPayload{
 		Key:        key,
@@ -28,12 +27,14 @@ func Persist(key string, data map[string]interface{}) {
 	body, _ := json.Marshal(payload)
 	resp, err := http.Post("http://localhost:9200/notifilter/event/?pretty", "application/json", bytes.NewReader(body))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer resp.Body.Close()
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	log.Print(string(body))
+	log.Println("[ES] Success")
+	log.Println("[ES]", string(body))
+	return nil
 }

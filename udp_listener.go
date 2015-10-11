@@ -25,11 +25,6 @@ type Stat struct {
 	Value types.JsonText `json:"value"`
 }
 
-type Notifier struct {
-	Class    string
-	Template string
-}
-
 type dbNotifier struct {
 	Id       int    `db:"id"`
 	Class    string `db:"class"`
@@ -38,7 +33,8 @@ type dbNotifier struct {
 
 func (s *Stat) persist() {
 	var incomingId int
-	err := db.QueryRow(`INSERT INTO incoming(received_at, data) VALUES($1, $2) RETURNING id`, time.Now(), s.Value).Scan(&incomingId)
+	query := `INSERT INTO incoming(received_at, class, data) VALUES($1, $2, $3) RETURNING id`
+	err := db.QueryRow(query, time.Now(), s.Key, s.Value).Scan(&incomingId)
 	if err != nil {
 		log.Fatal("persist()", err)
 	}
@@ -46,13 +42,8 @@ func (s *Stat) persist() {
 }
 
 func (s *Stat) notify() {
-	// find (active) notifiers
-	// execute them all
-
-	var err error
-
 	notifiers := []dbNotifier{}
-	err = db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", s.Key)
+	err := db.Select(&notifiers, "SELECT * FROM notifiers WHERE class=$1", s.Key)
 	if err != nil {
 		log.Fatal("db.Select ", err)
 	}
@@ -180,6 +171,9 @@ func sendEmail(class string, data []byte) {
 	if err != nil {
 		log.Fatal("smtp.SendMail ", err)
 	}
+
+	// drop e-mail job on a rate limited (max workers) queue
+	// already experienced a connection reset by peer locally
 }
 
 func main() {
@@ -192,6 +186,9 @@ func main() {
 		log.Fatal("ListenUDP", err)
 	}
 
+	go listenToUDP(conn)
+	http.HandleFunc("/", handleCount)
+
 	db, err = sqlx.Connect("postgres", "user=markmulder dbname=notifier sslmode=disable")
 	if err != nil {
 		log.Fatal("DB Open()", err)
@@ -200,9 +197,6 @@ func main() {
 
 	rows := countRows()
 	fmt.Println("Total rows: ", rows)
-
-	go listenToUDP(conn)
-	http.HandleFunc("/", handleCount)
 
 	fmt.Println("Will start listening on port 8000")
 	http.ListenAndServe(":8000", nil)

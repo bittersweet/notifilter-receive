@@ -4,6 +4,7 @@
 
 CREATE TABLE incoming(
   id serial primary key,
+  class character(256),
   received_at timestamp,
   data json
 );

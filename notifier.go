@@ -89,4 +89,5 @@ func (n *Notifier) notify(s *Stat, mn MessageNotifier) {
 
 	message := n.renderTemplate(s)
 	mn.sendMessage(s.Key, message)
+	fmt.Printf("Notifying notifier id: done\n", n.Id)
 }

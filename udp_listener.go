@@ -34,6 +34,10 @@ func (s *Stat) persist() {
 	fmt.Printf("class: %s id: %d\n", s.Key, incomingId)
 }
 
+func (s *Stat) notify() {
+	sendEmail(s.Key, string(s.Value))
+}
+
 func countRows() int {
 	var rows int
 	err := db.QueryRow("select count(*) from incoming").Scan(&rows)
@@ -64,6 +68,7 @@ func listenToUDP(conn *net.UDPConn) {
 		}
 
 		stat.persist()
+		stat.notify()
 	}
 }
 
@@ -81,7 +86,7 @@ func handleCount(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("MarshalIndent", err)
 	}
 
-	sendEmail()
+	sendEmail("testClass", "body")
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(output)
@@ -93,7 +98,11 @@ Subject: {{.Subject}}
 MIME-version: 1.0
 Content-Type: text/html; charset="UTF-8"
 
-{{.Body}}`
+<html>
+<body>
+{{.Body}}
+</body>
+</html>`
 
 type EmailData struct {
 	From    string
@@ -102,7 +111,7 @@ type EmailData struct {
 	Body    string
 }
 
-func sendEmail() {
+func sendEmail(class string, data string) {
 	var err error
 	var doc bytes.Buffer
 
@@ -111,11 +120,12 @@ func sendEmail() {
 	if err != nil {
 		log.Fatal("t.Parse ", err)
 	}
+	bodyString := fmt.Sprintf("<h1>class: %s</h1>\n<p>data: %s</p>", class, data)
 	context := &EmailData{
-		"Notifier <sender@example.com>",
+		"Springest Dev <developers@springest.nl>",
 		"recipient@example.com",
 		"Email subject line",
-		"Email body!\n\nPretty awesome.",
+		bodyString,
 	}
 	err = t.Execute(&doc, context)
 	if err != nil {
@@ -123,7 +133,7 @@ func sendEmail() {
 	}
 
 	auth := smtp.PlainAuth("", "", "", "localhost:1025")
-	err = smtp.SendMail("localhost:1025", auth, "", []string{"recipient@example.com"}, doc.Bytes())
+	err = smtp.SendMail("localhost:1025", auth, "test@example.com", []string{"recipient@example.com"}, doc.Bytes())
 	if err != nil {
 		log.Fatal("smtp.SendMail ", err)
 	}

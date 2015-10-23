@@ -58,11 +58,23 @@ func (n *Notifier) checkRules(e *Event) bool {
 	return true
 }
 
+func isset(a map[string]interface{}, key string) bool {
+	if _, ok := a[key]; ok {
+		return true
+	}
+	return false
+}
+
+var funcMap = template.FuncMap{
+	"isset": isset,
+}
+
 func (n *Notifier) renderTemplate(e *Event) ([]byte, error) {
 	var err error
 	var doc bytes.Buffer
 
 	t := template.New("notificationTemplate")
+	t.Funcs(funcMap)
 	t, err = t.Parse(n.Template)
 	if err != nil {
 		return []byte(""), err
@@ -84,7 +96,10 @@ func (n *Notifier) notify(e *Event, mn notifiers.MessageNotifier) {
 		return
 	}
 
-	message, _ := n.renderTemplate(e)
+	message, err := n.renderTemplate(e)
+	if err != nil {
+		e.log("[NOTIFY] renderTemplate failed:", err)
+	}
 	mn.SendMessage(n.Target, n.EventName, message)
 	e.log("[NOTIFY] Notifying notifier id: %d done", n.ID)
 }

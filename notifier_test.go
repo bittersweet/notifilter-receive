@@ -221,3 +221,25 @@ func TestNotifierRenderTemplateWithAdvancedLogic(t *testing.T) {
 	expected = "Incoming conversion: 10"
 	assert.Equal(t, expected, string(result))
 }
+
+func TestNotifierRenderTemplateWithIsset(t *testing.T) {
+	n := Notifier{}
+	n.Template = `{{ if isset . "number" }}number ({{ .number }}) is set!{{ end }}{{ if isset . "nope" }} this will not show {{ end }}`
+
+	data := types.JsonText(`{"number": 12}`)
+	event := setupTestNotifier(data)
+
+	result, err := n.renderTemplate(&event)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "number (12) is set!"
+	assert.Equal(t, expected, string(result))
+}
+
+func TestIsset(t *testing.T) {
+	data := map[string]interface{}{"a": 1}
+
+	assert.True(t, isset(data, "a"))
+	assert.False(t, isset(data, "b"))
+}

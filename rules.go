@@ -58,10 +58,9 @@ func metString(r *rule, parsed map[string]interface{}) bool {
 		if str == neededVal {
 			// We need not equal and string is equal
 			return false
-		} else {
-			// We need not equal and string is not equal
-			return true
 		}
+		// We need not equal and string is not equal
+		return true
 	}
 
 	if str != neededVal {

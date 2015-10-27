@@ -4,6 +4,7 @@ package elasticsearch
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -42,16 +43,23 @@ func (c *Client) Persist(requestID string, application string, name string, data
 		Data:        data,
 	}
 
-	body, _ := json.Marshal(payload)
-	resp, err := http.Post(c.URL(), "application/json", bytes.NewReader(body))
+	reqBody, _ := json.Marshal(payload)
+	resp, err := http.Post(c.URL(), "application/json", bytes.NewReader(reqBody))
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	_, err = ioutil.ReadAll(resp.Body)
+
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
+
+	if resp.StatusCode != 201 {
+		log.Printf("[ES] Error on persisting: %s", string(body))
+		return errors.New("Failure on persist")
+	}
+
 	log.Printf("%s [ES] persisted\n", requestID)
 	return nil
 }

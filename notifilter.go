@@ -66,7 +66,7 @@ func (e *Event) dataToMap() map[string]interface{} {
 func (e *Event) persist() {
 	err := ESClient.Persist(e.requestID, e.Application, e.Identifier, e.dataToMap())
 	if err != nil {
-		e.log("Error persisting to ElasticSearch:", err)
+		e.log("Error persisting to ElasticSearch: %s", err)
 	}
 }
 

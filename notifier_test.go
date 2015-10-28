@@ -243,3 +243,16 @@ func TestIsset(t *testing.T) {
 	assert.True(t, isset(data, "a"))
 	assert.False(t, isset(data, "b"))
 }
+
+func TestPresent(t *testing.T) {
+	assert.False(t, present(nil))
+	assert.False(t, present(""))
+	assert.True(t, present("not blank"))
+}
+
+func TestEq(t *testing.T) {
+	data := map[string]interface{}{"a": "string"}
+
+	assert.True(t, eq(data["a"], "string"))
+	assert.False(t, eq(data["a"], "something else"))
+}

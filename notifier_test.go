@@ -40,6 +40,21 @@ func TestNewNotifier(t *testing.T) {
 	assert.Equal(t, &notifiers.SlackNotifier{}, n.newNotifier())
 }
 
+func TestNotifierCheckRulesEmpty(t *testing.T) {
+	var rules = types.JsonText(`[]`)
+	n := Notifier{
+		NotificationType: "email",
+		EventName:        "User",
+		Template:         "name: {{.name}}",
+		Rules:            rules,
+	}
+
+	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	event := setupTestNotifier(data)
+
+	assert.Equal(t, true, n.checkRules(&event))
+}
+
 func TestNotifierCheckRulesSingle(t *testing.T) {
 	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "eq", "value": "12"}]`)
 	n := Notifier{

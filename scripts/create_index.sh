@@ -7,8 +7,9 @@ curl -XPUT 'http://localhost:9200/notifilter' -d '
   },
   "mappings": {
     "event": {
+      "numeric_detection": true,
       "properties": {
-        "app": {
+        "application": {
           "type": "string",
           "index": "not_analyzed"
         },
@@ -29,6 +30,15 @@ curl -XPUT 'http://localhost:9200/notifilter' -d '
             },
             "match": "*",
             "match_mapping_type": "string"
+          }
+        },
+        {
+          "onlyfloat": {
+            "mapping": {
+              "type": "double"
+            },
+            "match": "*",
+            "match_mapping_type": "long"
           }
         }
       ]

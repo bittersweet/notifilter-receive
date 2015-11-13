@@ -15,6 +15,14 @@ func (mec MockElasticsearchClient) EventCount() (int, error) {
 	return 1, nil
 }
 
+func (mec MockElasticsearchClient) Persist(a string, b string, c string, d map[string]interface{}) error {
+	return nil
+}
+
+func (mec MockElasticsearchClient) GetEvent(a string, b string) ([]byte, error) {
+	return []byte(""), nil
+}
+
 func TestCountStatus(t *testing.T) {
 	mockES := MockElasticsearchClient{}
 	countHandle := handleCount(mockES)

@@ -11,4 +11,7 @@ CREATE table notifiers(
   target character varying(256)
 );
 
-CREATE INDEX index_application_event_name ON notifiers (application, event_name)
+CREATE INDEX index_application_event_name ON notifiers (application, event_name);
+
+ALTER TABLE ONLY notifiers
+  ALTER rules SET DEFAULT '[]'::json;

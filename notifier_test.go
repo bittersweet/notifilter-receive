@@ -22,7 +22,7 @@ func (mn *LocalMessageNotifier) SendMessage(target string, eventName string, dat
 	mn.Processed = true
 }
 
-func setupTestNotifier(data types.JsonText) Event {
+func setupTestNotifier(data types.JSONText) Event {
 	return Event{
 		Identifier: "signup",
 		Data:       data,
@@ -41,7 +41,7 @@ func TestNewNotifier(t *testing.T) {
 }
 
 func TestNotifierCheckRulesEmpty(t *testing.T) {
-	var rules = types.JsonText(`[]`)
+	var rules = types.JSONText(`[]`)
 	n := Notifier{
 		NotificationType: "email",
 		EventName:        "User",
@@ -49,14 +49,14 @@ func TestNotifierCheckRulesEmpty(t *testing.T) {
 		Rules:            rules,
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	assert.Equal(t, true, n.checkRules(&event))
 }
 
 func TestNotifierCheckRulesSingle(t *testing.T) {
-	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "eq", "value": "12"}]`)
+	var rules = types.JSONText(`[{"key": "number", "type": "number", "setting": "eq", "value": "12"}]`)
 	n := Notifier{
 		NotificationType: "email",
 		EventName:        "User",
@@ -64,14 +64,14 @@ func TestNotifierCheckRulesSingle(t *testing.T) {
 		Rules:            rules,
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	assert.Equal(t, true, n.checkRules(&event))
 }
 
 func TestNotifierCheckRulesMultiple(t *testing.T) {
-	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "eq", "value": "12"}, {"key": "name", "type": "string", "setting": null, "value": "Go"}]`)
+	var rules = types.JSONText(`[{"key": "number", "type": "number", "setting": "eq", "value": "12"}, {"key": "name", "type": "string", "setting": null, "value": "Go"}]`)
 	n := Notifier{
 		NotificationType: "email",
 		EventName:        "User",
@@ -79,14 +79,14 @@ func TestNotifierCheckRulesMultiple(t *testing.T) {
 		Rules:            rules,
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	assert.Equal(t, true, n.checkRules(&event))
 }
 
 func TestNotifierCheckRulesSettingIsNull(t *testing.T) {
-	var rules = types.JsonText(`[{"key": "name", "type": "string", "setting": null "value": "Go"}]`)
+	var rules = types.JSONText(`[{"key": "name", "type": "string", "setting": null "value": "Go"}]`)
 	n := Notifier{
 		NotificationType: "email",
 		EventName:        "User",
@@ -94,14 +94,14 @@ func TestNotifierCheckRulesSettingIsNull(t *testing.T) {
 		Rules:            rules,
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	assert.Equal(t, true, n.checkRules(&event))
 }
 
 func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
-	var rules = types.JsonText(`[{"key": "name", "type": "string", "setting": "", "value": "Go"}]`)
+	var rules = types.JSONText(`[{"key": "name", "type": "string", "setting": "", "value": "Go"}]`)
 	n := Notifier{
 		NotificationType: "email",
 		EventName:        "User",
@@ -109,7 +109,7 @@ func TestNotifierCheckRulesSettingIsBlank(t *testing.T) {
 		Rules:            rules,
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	assert.Equal(t, true, n.checkRules(&event))
@@ -123,7 +123,7 @@ func TestNotifierNotify(t *testing.T) {
 		Target:           "email@example.com",
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	mn := &LocalMessageNotifier{}
@@ -135,7 +135,7 @@ func TestNotifierNotify(t *testing.T) {
 }
 
 func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
-	var rules = types.JsonText(`[{"key": "number", "type": "number", "setting": "gt", "value": "1"}]`)
+	var rules = types.JSONText(`[{"key": "number", "type": "number", "setting": "gt", "value": "1"}]`)
 	n := Notifier{
 		EventName:        "User",
 		Template:         "name: {{.name}}",
@@ -143,7 +143,7 @@ func TestNotifierNotifyReturnsEarlyIfRulesAreNotMet(t *testing.T) {
 		NotificationType: "email",
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 0}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 0}`)
 	event := setupTestNotifier(data)
 
 	mn := &LocalMessageNotifier{}
@@ -159,7 +159,7 @@ func TestNotifierRenderTemplate(t *testing.T) {
 		NotificationType: "email",
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	result, err := n.renderTemplate(&event)
@@ -173,7 +173,7 @@ func TestNotifierRenderWithInvalidTemplate(t *testing.T) {
 		Template: "name: {{.name}",
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	result, err := n.renderTemplate(&event)
@@ -188,7 +188,7 @@ func TestNotifierRenderWithInvalidData(t *testing.T) {
 		Template: "name: {{.name}}",
 	}
 
-	data := types.JsonText(`{"active": true}`)
+	data := types.JSONText(`{"active": true}`)
 	event := setupTestNotifier(data)
 
 	result, err := n.renderTemplate(&event)
@@ -203,14 +203,14 @@ func TestNotifierRenderTemplateWithLogic(t *testing.T) {
 		Template: template,
 	}
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	result, _ := n.renderTemplate(&event)
 	expected := []byte("Active!")
 	assert.Equal(t, expected, result)
 
-	data = types.JsonText(`{"active": false, "name": "Go", "number": 12}`)
+	data = types.JSONText(`{"active": false, "name": "Go", "number": 12}`)
 	event = setupTestNotifier(data)
 
 	result, _ = n.renderTemplate(&event)
@@ -222,14 +222,14 @@ func TestNotifierRenderTemplateWithAdvancedLogic(t *testing.T) {
 	n := Notifier{}
 	n.Template = `Incoming conversion: {{ if gt .number 10.0 }}(Making it rain!) {{ end }}{{ .number }}`
 
-	data := types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+	data := types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 	event := setupTestNotifier(data)
 
 	result, _ := n.renderTemplate(&event)
 	expected := "Incoming conversion: (Making it rain!) 12"
 	assert.Equal(t, expected, string(result))
 
-	data = types.JsonText(`{"active": true, "name": "Go", "number": 10}`)
+	data = types.JSONText(`{"active": true, "name": "Go", "number": 10}`)
 	event = setupTestNotifier(data)
 
 	result, _ = n.renderTemplate(&event)
@@ -241,7 +241,7 @@ func TestNotifierRenderTemplateWithIsset(t *testing.T) {
 	n := Notifier{}
 	n.Template = `{{ if isset . "number" }}number ({{ .number }}) is set!{{ end }}{{ if isset . "nope" }} this will not show {{ end }}`
 
-	data := types.JsonText(`{"number": 12}`)
+	data := types.JSONText(`{"number": 12}`)
 	event := setupTestNotifier(data)
 
 	result, err := n.renderTemplate(&event)

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var jt = types.JsonText(`{"active": true, "name": "Go", "number": 12}`)
+var jt = types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
 
 func TestRuleKeyDoesNotMatch(t *testing.T) {
 	event := setupTestNotifier(jt)
@@ -32,7 +32,7 @@ func TestRuleKeyDoesMatch(t *testing.T) {
 }
 
 func TestBoolFalse(t *testing.T) {
-	jt := types.JsonText(`{"active": false}`)
+	jt := types.JSONText(`{"active": false}`)
 	event := setupTestNotifier(jt)
 
 	r := rule{

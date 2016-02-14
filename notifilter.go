@@ -48,7 +48,7 @@ type Event struct {
 	Application string `json:"application"`
 	Identifier  string `json:"identifier"`
 	requestID   string
-	Data        types.JsonText `json:"data"`
+	Data        types.JSONText `json:"data"`
 }
 
 // dataToMap transforms the raw JSON data into a map

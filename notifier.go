@@ -17,7 +17,7 @@ type Notifier struct {
 	Application      string         `db:"application"`
 	EventName        string         `db:"event_name"`
 	Template         string         `db:"template"`
-	Rules            types.JsonText `db:"rules"`
+	Rules            types.JSONText `db:"rules"`
 	NotificationType string         `db:"notification_type"`
 	Target           string         `db:"target"`
 }

@@ -67,15 +67,15 @@ func isset(a map[string]interface{}, key string) bool {
 }
 
 func present(str interface{}) bool {
-	if str == nil {
+	switch t := str.(type) {
+	case nil:
 		return false
+	case string:
+		return t != ""
+	case bool:
+		return t == true
 	}
-
-	if str.(string) != "" {
-		return true
-	}
-
-	return false
+	return true
 }
 
 func eq(x, y interface{}) bool {

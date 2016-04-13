@@ -262,7 +262,9 @@ func TestIsset(t *testing.T) {
 func TestPresent(t *testing.T) {
 	assert.False(t, present(nil))
 	assert.False(t, present(""))
+	assert.False(t, present(false))
 	assert.True(t, present("not blank"))
+	assert.True(t, present(true))
 }
 
 func TestEq(t *testing.T) {

@@ -11,6 +11,11 @@ import (
 	"github.com/jmoiron/sqlx/types"
 )
 
+type previewData struct {
+	Template string         `json:"template"`
+	Data     types.JSONText `json:"data"`
+}
+
 func trackTime(start time.Time, name string) {
 	elapsed := time.Since(start)
 	log.Printf("%s took %s\n", name, elapsed)
@@ -40,11 +45,6 @@ func handleCount(es elasticsearch.ElasticsearchClient) http.Handler {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(output)
 	})
-}
-
-type previewData struct {
-	Template string         `json:"template"`
-	Data     types.JSONText `json:"data"`
 }
 
 func handlePreview() http.Handler {

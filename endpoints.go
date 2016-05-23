@@ -68,6 +68,8 @@ func handlePreview() http.Handler {
 		res, err := renderTemplate(pD.Template, &eD)
 		if err != nil {
 			log.Println("renderTemplate error", err)
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.Write([]byte(err.Error()))
 			return
 		}
 

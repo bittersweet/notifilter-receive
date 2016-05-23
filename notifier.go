@@ -137,3 +137,22 @@ func (n *Notifier) notify(e *Event, mn notifiers.MessageNotifier) {
 	mn.SendMessage(n.Target, n.EventName, message)
 	e.log("[NOTIFY] Notifying notifier id: %d done", n.ID)
 }
+
+func renderTemplate(tmpl string, e *Event) ([]byte, error) {
+	var err error
+	var doc bytes.Buffer
+
+	t := template.New("notificationTemplate")
+	t.Funcs(funcMap)
+	t, err = t.Parse(tmpl)
+	if err != nil {
+		return []byte(""), err
+	}
+
+	err = t.Execute(&doc, e.dataToMap())
+	if err != nil {
+		return []byte(""), err
+	}
+
+	return doc.Bytes(), nil
+}

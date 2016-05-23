@@ -198,6 +198,7 @@ func main() {
 
 	http.Handle("/v1/count", handleCount(&ESClient))
 	http.Handle("/v1/statistics", handleStatistics(startTime))
+	http.Handle("/v1/preview", handlePreview())
 
 	fmt.Printf("Will start listening on port %s\n", port)
 	err = http.ListenAndServe(port, nil)

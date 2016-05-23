@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/bittersweet/notifilter/elasticsearch"
+	"github.com/jmoiron/sqlx/types"
 )
 
 func trackTime(start time.Time, name string) {
@@ -38,6 +39,40 @@ func handleCount(es elasticsearch.ElasticsearchClient) http.Handler {
 
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(output)
+	})
+}
+
+type previewData struct {
+	Template string         `json:"template"`
+	Data     types.JSONText `json:"data"`
+}
+
+func handlePreview() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer trackTime(time.Now(), "handlePreview")
+
+		// Decode incoming JSON to grab template and data
+		decoder := json.NewDecoder(r.Body)
+		var pD previewData
+		err := decoder.Decode(&pD)
+		if err != nil {
+			log.Println("newDecoder preview error", err)
+			return
+		}
+
+		eD := Event{
+			Data: pD.Data,
+		}
+
+		// Render template with data
+		res, err := renderTemplate(pD.Template, &eD)
+		if err != nil {
+			log.Println("renderTemplate error", err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Write([]byte(res))
 	})
 }
 

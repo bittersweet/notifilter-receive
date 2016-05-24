@@ -265,6 +265,7 @@ func TestPresent(t *testing.T) {
 	assert.False(t, present(false))
 	assert.True(t, present("not blank"))
 	assert.True(t, present(true))
+	assert.True(t, present(0.1))
 }
 
 func TestEq(t *testing.T) {

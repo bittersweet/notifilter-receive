@@ -75,6 +75,8 @@ func present(str interface{}) bool {
 	case bool:
 		return t == true
 	}
+
+	// If it was not nil, a blank string or false, we can assume it's present.
 	return true
 }
 

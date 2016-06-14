@@ -1,7 +1,7 @@
 # Notifilter
 Get notified about events
 
-[![Build Status](https://travis-ci.org/bittersweet/notifilter.svg)](https://travis-ci.org/bittersweet/notifilter)
+[![Build Status](https://travis-ci.org/bittersweet/notifilter-receive.svg)](https://travis-ci.org/bittersweet/notifilter-receive)
 
 Quick explanation:
 
@@ -15,8 +15,8 @@ People buy products on your website, you send all `conversion` events to Notifil
 
 ### Ecosystem
 
+* [notifilter](https://github.com/bittersweet/notifilter) - Elixir/Phoenix/React app that powers the frontend
 * [notifilter-rb](https://github.com/bittersweet/notifilter-rb) – Ruby gem to track events
-* [notifilter-frontend](https://github.com/bittersweet/notifilter-frontend) – React based frontend to set up notifications
 
 ### Architecture & Requirements
 

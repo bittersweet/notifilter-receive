@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"text/template"
 
-	"github.com/bittersweet/notifilter/notifiers"
+	"github.com/bittersweet/notifilter-receive/notifiers"
 
 	"github.com/jmoiron/sqlx/types"
 )

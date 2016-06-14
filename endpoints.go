@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/bittersweet/notifilter/elasticsearch"
+	"github.com/bittersweet/notifilter-receive/elasticsearch"
 	"github.com/jmoiron/sqlx/types"
 )
 

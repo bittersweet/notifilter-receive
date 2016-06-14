@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/bittersweet/notifilter/notifiers"
+	"github.com/bittersweet/notifilter-receive/notifiers"
 	"github.com/jmoiron/sqlx/types"
 	"github.com/stretchr/testify/assert"
 )

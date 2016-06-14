@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bittersweet/notifilter/elasticsearch"
+	"github.com/bittersweet/notifilter-receive/elasticsearch"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"github.com/kelseyhightower/envconfig"

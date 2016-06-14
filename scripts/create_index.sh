@@ -8,6 +8,7 @@ curl -XPUT 'http://localhost:9200/notifilter' -d '
   "mappings": {
     "event": {
       "numeric_detection": true,
+      "date_detection": false,
       "properties": {
         "application": {
           "type": "string",

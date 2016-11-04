@@ -274,3 +274,18 @@ func TestEq(t *testing.T) {
 	assert.True(t, eq(data["a"], "string"))
 	assert.False(t, eq(data["a"], "something else"))
 }
+
+func TestDecodeJSON(t *testing.T) {
+	n := Notifier{
+		EventName:        "User",
+		Template:         "nested: {{ $obj := decodeJSON .nested }}{{ $obj.key }}",
+		NotificationType: "email",
+	}
+
+	data := types.JSONText(`{"nested": "{\"key\": \"value\"}"}`)
+	event := setupTestNotifier(data)
+
+	result, _ := n.renderTemplate(&event)
+	expected := []byte("nested: value")
+	assert.Equal(t, expected, result)
+}

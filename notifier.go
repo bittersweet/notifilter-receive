@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
+	"log"
 	"reflect"
 	"text/template"
 
@@ -80,6 +82,15 @@ func present(str interface{}) bool {
 	return true
 }
 
+func decodeJSON(str string) map[string]interface{} {
+	var parsed map[string]interface{}
+	err := json.Unmarshal([]byte(str), &parsed)
+	if err != nil {
+		log.Fatal("json.Unmarshal decodeJson", err)
+	}
+	return parsed
+}
+
 func eq(x, y interface{}) bool {
 	normalize := func(v interface{}) interface{} {
 		vv := reflect.ValueOf(v)
@@ -100,9 +111,10 @@ func eq(x, y interface{}) bool {
 }
 
 var funcMap = template.FuncMap{
-	"isset":   isset,
-	"present": present,
-	"eq":      eq,
+	"isset":      isset,
+	"present":    present,
+	"eq":         eq,
+	"decodeJSON": decodeJSON,
 }
 
 func (n *Notifier) renderTemplate(e *Event) ([]byte, error) {

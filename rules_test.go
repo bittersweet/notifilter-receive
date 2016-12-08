@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var jt = types.JSONText(`{"active": true, "name": "Go", "number": 12}`)
+var jt = types.JSONText(`{"active": true, "name": "Go", "number": 12, "empty": null}`)
 
 func TestRuleKeyDoesNotMatch(t *testing.T) {
 	event := setupTestNotifier(jt)
@@ -84,6 +84,19 @@ func TestStringDoesNotMatch(t *testing.T) {
 	assert.Equal(t, false, result)
 }
 
+func TestStringDoesMatchAndNil(t *testing.T) {
+	event := setupTestNotifier(jt)
+
+	r := rule{
+		Key:   "empty",
+		Type:  "string",
+		Value: "Go",
+	}
+
+	result := r.Met(&event)
+	assert.Equal(t, false, result)
+}
+
 func TestStringNotEqualIsEqual(t *testing.T) {
 	event := setupTestNotifier(jt)
 
@@ -106,6 +119,20 @@ func TestStringNotEqualIsNotEqual(t *testing.T) {
 		Type:    "string",
 		Setting: "noteq",
 		Value:   "NotGo",
+	}
+
+	result := r.Met(&event)
+	assert.Equal(t, true, result)
+}
+
+func TestStringNotEqualIsNotEqualAndNil(t *testing.T) {
+	event := setupTestNotifier(jt)
+
+	r := rule{
+		Key:     "empty",
+		Type:    "string",
+		Setting: "noteq",
+		Value:   "test",
 	}
 
 	result := r.Met(&event)

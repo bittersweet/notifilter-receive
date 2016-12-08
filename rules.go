@@ -26,6 +26,15 @@ func (r *rule) Met(e *Event) bool {
 		return false
 	}
 
+	// if key is present but nil
+	if parsed[r.Key] == nil {
+		if r.Setting == "noteq" {
+			return true
+		}
+
+		return false
+	}
+
 	switch r.Type {
 	case "boolean":
 		return metBool(r, parsed)

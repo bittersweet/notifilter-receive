@@ -46,16 +46,12 @@ func (n *Notifier) getRules() []*rule {
 
 func (n *Notifier) checkRules(e *Event) bool {
 	rules := n.getRules()
-	rulesMet := true
 	for _, rule := range rules {
 		if !rule.Met(e) {
 			e.log("[NOTIFY] rule not met -- Key: %s, Type: %s, Setting %s, Value %s, Received Value %v", rule.Key, rule.Type, rule.Setting, rule.Value, e.dataToMap()[rule.Key])
-			rulesMet = false
+			e.log("[NOTIFY] Stopping notification of id: %d, rules not met", n.ID)
+			return false
 		}
-	}
-	if !rulesMet {
-		e.log("[NOTIFY] Stopping notification of id: %d, rules not met", n.ID)
-		return false
 	}
 
 	return true

@@ -31,3 +31,18 @@ receive data
                 set up that match this event      - notify channel with configured template
 
 ```
+
+# Docker related
+
+Build locally and add the binary to a scratch container:
+
+```bash
+CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o notifilter-receive .
+docker build -t bittersweet/notifilter-receive -f Dockerfile.scratch .
+```
+
+Push to docker hub:
+
+```
+docker push bittersweet/notifilter-receive:v1.0.0
+```

@@ -4,6 +4,6 @@ go:
   - 1.10
 
 install:
-  - go get -t -v
+  - go get -u -v
 
 script: go test -v ./...

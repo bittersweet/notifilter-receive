@@ -29,10 +29,10 @@ func (s *SlackNotifier) SendMessage(target string, eventName string, data []byte
 	payloadReader := bytes.NewReader(payloadEnc)
 
 	slackResp, err := http.Post(s.HookURL, "application/json", payloadReader)
-	defer slackResp.Body.Close()
 	if err != nil {
 		panic(err)
 	}
+	defer slackResp.Body.Close()
 
 	slackBody, err := ioutil.ReadAll(slackResp.Body)
 	log.Println("Slack Response:", string(slackBody))

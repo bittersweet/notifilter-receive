@@ -24,7 +24,7 @@ type ElasticsearchClient interface {
 
 // URL returns the full URL to the elasticsearch host, port and index
 func (c *Client) URL() string {
-	return fmt.Sprintf("http://%s:%d/%s/event", c.Host, c.Port, c.Index)
+	return fmt.Sprintf("http://%s:%d/%s", c.Host, c.Port, c.Index)
 }
 
 // Persist saves incoming events to Elasticsearch
@@ -44,7 +44,8 @@ func (c *Client) Persist(requestID string, application string, name string, data
 	}
 
 	reqBody, _ := json.Marshal(payload)
-	resp, err := http.Post(c.URL(), "application/json", bytes.NewReader(reqBody))
+	url := fmt.Sprintf("%s/_doc", c.URL())
+	resp, err := http.Post(url, "application/json", bytes.NewReader(reqBody))
 	if err != nil {
 		return err
 	}
@@ -68,7 +69,9 @@ func (c *Client) Persist(requestID string, application string, name string, data
 func (c *Client) EventCount() (int, error) {
 	type response struct {
 		Hits struct {
-			Total int `json:"total"`
+			Total struct {
+				Value int `json:"value"`
+			} `json:"total"`
 		} `json:"hits"`
 	}
 
@@ -88,5 +91,5 @@ func (c *Client) EventCount() (int, error) {
 		return 0, err
 	}
 
-	return parsed.Hits.Total, nil
+	return parsed.Hits.Total.Value, nil
 }
